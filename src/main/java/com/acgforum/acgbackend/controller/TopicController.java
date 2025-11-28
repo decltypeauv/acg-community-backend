@@ -35,6 +35,7 @@ public class TopicController {
     public Map<String, Object> publish(
             @RequestParam("title") String title,
             @RequestParam("content") String content,
+            @RequestParam(value = "category", defaultValue = "General") String category, // <--- 新增这行
             @RequestParam(value = "files", required = false) MultipartFile[] files, // 允许不传图，也可以传多个
             HttpSession session) {
         
@@ -52,6 +53,7 @@ public class TopicController {
         Topic topic = new Topic();
         topic.setTitle(title);
         topic.setContent(content);
+        topic.setCategory(category); // <--- 新增这行：保存分类
         topic.setAuthor(user);
         Topic savedTopic = topicRepository.save(topic); // 先保存，拿到 ID
 
@@ -103,7 +105,12 @@ public class TopicController {
 
     // 获取列表 (Entity 修改后，这里自动会带出 mediaList)
     @GetMapping("/list")
-    public List<Topic> getTopicList() {
+    public List<Topic> getTopicList(@RequestParam(required = false) String category) {
+        if (category != null && !category.isEmpty() && !category.equals("All")) {
+            // 如果传了分类，就只查那个分类
+            return topicRepository.findByCategoryOrderByCreatedAtDesc(category);
+        }
+        // 否则查所有
         return topicRepository.findAllByOrderByCreatedAtDesc();
     }
     

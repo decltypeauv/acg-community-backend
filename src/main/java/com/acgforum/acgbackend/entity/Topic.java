@@ -25,7 +25,10 @@ public class Topic {
     private User author;    // 发帖人
 
     private LocalDateTime createdAt;
-    
+     // 【新增】记录当前帖子的总分 (点赞+1，点踩-1)
+    private Integer voteCount = 0;
+    // 【新增】分类字段 (例如: "Anime", "Game", "Art")
+    private String category;
     // 这里可以加一个字段统计回复数，暂时先不加，简单点
     
     // 【新增】一个话题包含多个媒体文件

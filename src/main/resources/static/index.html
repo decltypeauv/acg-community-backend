@@ -11,8 +11,8 @@
             --bg-card: #FFFFFF;
             --text-main: #1c1c1c;
             --text-meta: #787c7e;
-            --color-primary: #D93A00;
-            --color-blue: #0079D3;
+            --color-primary: #D93A00; /* Reddit Orange */
+            --color-blue: #7193FF;    /* Reddit Blue */
             --hover-bg: #f6f7f8;
         }
 
@@ -34,75 +34,75 @@
             width: 100%; height: 32px; background: #F6F7F8; border: 1px solid #EDEFF1; 
             border-radius: 16px; padding: 0 16px; outline: none; transition: 0.2s;
         }
-        .search-input:focus { background: white; border-color: var(--color-blue); }
+        .search-input:focus { background: white; border-color: #0079D3; }
 
-        /* --- 右上角用户区 (重点修改) --- */
+        /* 用户区 */
         .nav-right-area { display: flex; align-items: center; height: 100%; }
-        
-        /* 下拉菜单容器 */
-        .user-dropdown-container {
-            position: relative; height: 100%; display: flex; align-items: center;
-            padding: 0 5px; cursor: pointer; border: 1px solid transparent;
-        }
+        .user-dropdown-container { position: relative; height: 100%; display: flex; align-items: center; padding: 0 5px; cursor: pointer; border: 1px solid transparent; }
         .user-dropdown-container:hover { border: 1px solid #edeff1; }
-
-        /* 鼠标悬停显示下拉菜单 */
         .user-dropdown-container:hover .user-menu-dropdown { display: block; }
 
         .nav-avatar-box { display: flex; align-items: center; gap: 8px; padding: 5px; border-radius: 4px; }
         .nav-avatar { width: 30px; height: 30px; border-radius: 4px; background: #ddd; object-fit: cover; }
         .nav-user-meta { display: flex; flex-direction: column; font-size: 12px; line-height: 1.2; margin-right: 5px; }
         .nav-nickname { font-weight: bold; max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .nav-karma { color: var(--text-meta); }
 
-        /* 下拉菜单本体 */
         .user-menu-dropdown {
-            display: none; /* 默认隐藏 */
-            position: absolute; top: 48px; right: 0; width: 200px;
+            display: none; position: absolute; top: 48px; right: 0; width: 200px;
             background: white; border: 1px solid #edeff1; border-radius: 0 0 4px 4px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            padding: 10px 0; z-index: 1100;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); padding: 10px 0; z-index: 1100;
         }
+        .menu-item { padding: 10px 20px; font-size: 14px; display: flex; align-items: center; gap: 10px; transition: 0.2s; }
+        .menu-item:hover { background: #E8F0FE; }
         
-        /* 菜单项 */
-        .menu-item {
-            padding: 10px 20px; font-size: 14px; color: var(--text-main); display: flex; align-items: center; gap: 10px; transition: 0.2s;
-        }
-        .menu-item:hover { background: #E8F0FE; color: var(--text-main); }
-        .menu-icon { width: 20px; text-align: center; font-size: 16px; }
-        .menu-divider { height: 1px; background: #edeff1; margin: 5px 0; }
-
         .btn-auth { padding: 6px 20px; border-radius: 99px; font-weight: bold; font-size: 14px; cursor: pointer; }
         .btn-login { background: var(--color-primary); color: white; border: none; }
-        .btn-outline { border: 1px solid var(--color-blue); color: var(--color-blue); background: transparent; }
+        .btn-outline { border: 1px solid #0079D3; color: #0079D3; background: transparent; }
 
         /* --- 主布局 --- */
         .layout-container { display: grid; grid-template-columns: 270px 1fr 310px; gap: 24px; max-width: 1600px; margin: 20px auto; padding: 0 24px; }
-        .sidebar-left { display: flex; flex-direction: column; gap: 5px; font-size: 14px; }
+        .sidebar-left { display: flex; flex-direction: column; gap: 5px; font-size: 14px; 
+            position: sticky;/* 开启粘性定位 */top: 60px;/* 距离顶部 60px 时停住 (因为顶部导航栏约 50px) */height: fit-content;
+            /* 高度仅包裹内容，不要撑满全屏，否则 sticky 没法动 */}
         .nav-item { padding: 8px 12px; border-radius: 4px; cursor: pointer; color: var(--text-main); }
         .nav-item:hover { background-color: var(--hover-bg); }
+        
         .main-feed { min-width: 0; }
-        .sidebar-right { display: flex; flex-direction: column; gap: 16px; }
+        .sidebar-right { display: flex; flex-direction: column; gap: 16px; 
+            position: sticky;/* 开启粘性定位 */top: 60px;/* 距离顶部 60px 时停住 (因为顶部导航栏约 50px) */height: fit-content;
+            /* 高度仅包裹内容，不要撑满全屏，否则 sticky 没法动 */}
         
         /* 帖子卡片样式 */
         .post-card { background: var(--bg-card); border: 1px solid #ccc; border-radius: 4px; margin-bottom: 10px; display: flex; cursor: pointer; }
         .post-card:hover { border-color: #898989; }
-        .vote-column { width: 40px; background: #F8F9FA; display: flex; flex-direction: column; align-items: center; padding-top: 8px; }
+        
+        /* --- 投票列 (新增样式) --- */
+        .vote-column { width: 40px; background: #F8F9FA; display: flex; flex-direction: column; align-items: center; padding-top: 8px; border-radius: 4px 0 0 4px; }
+        .vote-btn { font-size: 20px; color: #878A8C; cursor: pointer; font-weight: bold; padding: 2px 5px; border-radius: 2px; }
+        .vote-btn:hover { background: #E8E8E8; }
+        .vote-count { font-size: 13px; font-weight: bold; margin: 5px 0; }
+
+        /* 激活状态 */
+        .vote-btn.up.active { color: var(--color-primary); }
+        .vote-btn.down.active { color: var(--color-blue); }
+        .vote-count.active-up { color: var(--color-primary); }
+        .vote-count.active-down { color: var(--color-blue); }
+
         .content-column { flex: 1; padding: 8px; }
         .media-preview { background: black; display: flex; justify-content: center; margin-bottom: 10px; border-radius: 4px; overflow: hidden; }
         .media-preview img, .media-preview video { max-width: 100%; max-height: 500px; }
 
         /* Widget */
         .widget-box { background: var(--bg-card); border: 1px solid #ccc; border-radius: 4px; overflow: hidden; }
-        .widget-header { background: var(--color-blue); color: white; padding: 10px; font-weight: bold; }
+        .widget-header { background: #0079D3; color: white; padding: 10px; font-weight: bold; }
         .widget-content { padding: 12px; }
 
-        /* 弹窗 */
+        /* 弹窗通用 */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; display: none; justify-content: center; align-items: center; }
         .modal-overlay.active { display: flex; }
         .modal-box { background: white; width: 500px; padding: 20px; border-radius: 8px; }
         .common-input { width: 100%; border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; border-radius: 4px; }
-        .primary-btn { width: 100%; background: var(--color-blue); color: white; padding: 10px; border: none; border-radius: 99px; cursor: pointer; }
+        .primary-btn { width: 100%; background: #0079D3; color: white; padding: 10px; border: none; border-radius: 99px; cursor: pointer; }
 
         @media (max-width: 1000px) { .sidebar-left { display: none; } .layout-container { grid-template-columns: 1fr 310px; } }
         @media (max-width: 700px) { .sidebar-right { display: none; } .layout-container { grid-template-columns: 1fr; } }
@@ -110,7 +110,7 @@
 </head>
 <body>
 
-    <!-- 顶部导航 -->
+    <!-- 导航栏 -->
     <nav class="navbar">
         <div class="nav-logo">
             <div class="nav-logo-icon">A</div>
@@ -121,73 +121,51 @@
         </div>
         
         <div class="nav-right-area">
-            <!-- 未登录显示 -->
             <div id="guest-nav" style="display: flex; gap:10px;">
-                <button class="btn-auth btn-outline" onclick="openModal('registerModal')">注册</button>
-                <button class="btn-auth btn-login" onclick="openModal('loginModal')">登录</button>
+                <button class="btn-auth btn-outline" onclick="openModal('registerModal')">Sign Up</button>
+                <button class="btn-auth btn-login" onclick="openModal('loginModal')">Log In</button>
             </div>
-
-            <!-- 已登录显示 (带下拉菜单) -->
             <div id="user-nav" class="user-dropdown-container" style="display: none;">
                 <div class="nav-avatar-box">
                     <div class="nav-user-meta">
                         <span id="nav-username" class="nav-nickname">User</span>
-                        <span class="nav-karma">1 karma</span>
                     </div>
                     <img id="nav-avatar-img" class="nav-avatar" src="">
-                    <span style="font-size: 10px; color: #787c7e;">▼</span>
+                    <span>▼</span>
                 </div>
-
-                <!-- 下拉菜单 -->
                 <div class="user-menu-dropdown">
-                    <div style="padding: 10px 20px; font-weight: bold; color: #787c7e; font-size: 12px;">MY STUFF</div>
-                    
-                    <div class="menu-item" onclick="alert('功能开发中：个人中心')">
-                        <span class="menu-icon">👤</span> Profile
-                    </div>
-                    
-                    <!-- 编辑头像 (点击触发隐藏的 file input) -->
-                    <div class="menu-item" onclick="triggerAvatarUpload()">
-                        <span class="menu-icon">📸</span> Edit Avatar
-                    </div>
-
-                    <div class="menu-item" onclick="alert('功能开发中：账户设置')">
-                        <span class="menu-icon">⚙️</span> Settings
-                    </div>
-
-                    <div class="menu-divider"></div>
-
-                    <div class="menu-item" onclick="logout()">
-                        <span class="menu-icon">🚪</span> Log Out
-                    </div>
+                    <div class="menu-item" onclick="triggerAvatarUpload()">📸 Edit Avatar</div>
+                    <div class="menu-item" onclick="logout()">🚪 Log Out</div>
                 </div>
             </div>
-            <!-- 隐藏的文件上传控件，用于换头像 -->
             <input type="file" id="avatar-upload-input" style="display: none;" accept="image/*">
         </div>
     </nav>
 
     <!-- 主布局 -->
     <div class="layout-container">
-        <!-- 左边栏 -->
         <aside class="sidebar-left">
-            <div class="nav-item">🏠 Home</div>
+            <!-- 点击 Home 显示所有 -->
+            <div class="nav-item" onclick="loadFeed('All')">🏠 Home</div>
             <div class="nav-item">🔥 Popular</div>
-            <div class="nav-item">📺 Anime</div>
+            
+            <div class="section-header">TOPICS</div>
+            <!-- 点击分类只看对应内容 -->
+            <div class="nav-item" onclick="loadFeed('Game')">🎮 Gaming</div>
+            <div class="nav-item" onclick="loadFeed('Anime')">📺 Anime</div>
+            <div class="nav-item" onclick="loadFeed('Art')">🎨 Art</div>
+            
+            <!-- ... -->
         </aside>
 
-        <!-- 中间流 -->
         <main class="main-feed">
-            <!-- 发帖触发 -->
             <div style="background:white; padding:10px; border:1px solid #ccc; border-radius:4px; margin-bottom:15px; display:flex; align-items:center; gap:10px;">
                 <img id="post-bar-avatar" style="width:38px; height:38px; border-radius:50%; background:#ddd;" src="">
                 <input type="text" placeholder="Create Post" onclick="checkLoginAndOpenPublish()" style="flex:1; height:38px; border:1px solid #ddd; background:#f6f7f8; border-radius:4px; padding-left:10px;">
             </div>
-
             <div id="feed-list">Loading...</div>
         </main>
 
-        <!-- 右边栏 -->
         <aside class="sidebar-right">
             <div class="widget-box">
                 <div class="widget-header">About Community</div>
@@ -199,7 +177,7 @@
         </aside>
     </div>
 
-    <!-- 弹窗 (登录/发帖) -->
+    <!-- 弹窗 -->
     <div class="modal-overlay" id="loginModal">
         <div class="modal-box" style="width: 350px;">
             <div style="font-weight:bold; margin-bottom:15px; font-size:18px;">Log In</div>
@@ -209,29 +187,29 @@
             <div style="margin-top:10px; text-align:right; cursor:pointer;" onclick="closeModal('loginModal')">Close</div>
         </div>
     </div>
-    <!-- 注册弹窗 (新增) -->
+    
+    <!-- 注册弹窗 -->
     <div class="modal-overlay" id="registerModal">
         <div class="modal-box" style="width: 350px;">
-            <div class="modal-header">
-                <span>Sign Up</span>
-                <span style="cursor:pointer" onclick="closeModal('registerModal')">×</span>
-            </div>
-            
-            <input type="text" id="r-user" class="common-input" placeholder="Username (账号)">
-            <input type="text" id="r-nick" class="common-input" placeholder="Nickname (昵称)">
-            <input type="password" id="r-pass" class="common-input" placeholder="Password (密码)">
-            
+            <div style="font-weight:bold; margin-bottom:15px; font-size:18px;">Sign Up</div>
+            <input type="text" id="r-user" class="common-input" placeholder="Username">
+            <input type="text" id="r-nick" class="common-input" placeholder="Nickname">
+            <input type="password" id="r-pass" class="common-input" placeholder="Password">
             <button class="primary-btn" onclick="doRegister()">Sign Up</button>
-            
-            <div style="margin-top:15px; font-size:12px; text-align:center;">
-                Already have an account? 
-                <span style="color:var(--color-blue); cursor:pointer; font-weight:bold;" onclick="switchModal('registerModal','loginModal')">Log In</span>
-            </div>
+            <div style="margin-top:10px; text-align:right; cursor:pointer;" onclick="closeModal('registerModal')">Close</div>
         </div>
     </div>
+
     <div class="modal-overlay" id="publishModal">
         <div class="modal-box" style="width: 600px;">
             <div style="font-weight:bold; margin-bottom:15px; font-size:18px;">Create Post</div>
+            <!-- 【新增】分类选择器 -->
+            <select id="p-category" class="common-input" style="background: white;">
+                <option value="General">General (综合)</option>
+                <option value="Anime">📺 Anime (动画)</option>
+                <option value="Game">🎮 Game (游戏)</option>
+                <option value="Art">🎨 Art (绘画)</option>
+            </select>
             <input type="text" id="p-title" class="common-input" placeholder="Title">
             <textarea id="p-content" class="common-input" style="height:100px; resize:none;" placeholder="Content"></textarea>
             <input type="file" id="p-files" multiple style="margin-bottom:10px;">
@@ -241,65 +219,21 @@
     </div>
 
     <script>
-        // --- 基础 ---
         function openModal(id) { document.getElementById(id).classList.add('active'); }
         function closeModal(id) { document.getElementById(id).classList.remove('active'); }
         function checkLoginAndOpenPublish() {
             if(document.getElementById('guest-nav').style.display !== 'none') openModal('loginModal');
             else openModal('publishModal');
         }
-        // --- 新增工具函数：在弹窗之间切换 ---
-        function switchModal(closeId, openId) {
-            closeModal(closeId);
-            openModal(openId);
-        }
 
-        // --- 新增注册逻辑 ---
-        async function doRegister() {
-            const u = document.getElementById('r-user').value;
-            const n = document.getElementById('r-nick').value;
-            const p = document.getElementById('r-pass').value;
-
-            if(!u || !p) { alert("账号和密码必填"); return; }
-
-            const btn = document.querySelector('#registerModal .primary-btn');
-            btn.innerText = "Signing up..."; btn.disabled = true;
-
-            try {
-                // 调用第一天写的 AuthController
-                const res = await fetch('/api/auth/register', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({
-                        username: u,
-                        password: p,
-                        nickname: n,
-                        email: "" // 暂时留空
-                    })
-                });
-                const d = await res.json();
-
-                if(d.success) {
-                    alert("注册成功！快去登录吧");
-                    switchModal('registerModal', 'loginModal'); // 注册完自动跳到登录框
-                } else {
-                    alert("注册失败: " + d.msg);
-                }
-            } catch(e) {
-                alert("网络错误");
-            } finally {
-                btn.innerText = "Sign Up"; btn.disabled = false;
-            }
-        }
-        // --- 1. 登录 & 状态 ---
+        // --- Auth & User ---
         async function checkLogin() {
             try {
                 const res = await fetch('/api/auth/check');
                 const d = await res.json();
                 if(d.isLogin) {
                     document.getElementById('guest-nav').style.display = 'none';
-                    document.getElementById('user-nav').style.display = 'flex'; // 显示用户区
-                    
+                    document.getElementById('user-nav').style.display = 'flex';
                     document.getElementById('nav-username').innerText = d.user.nickname;
                     const avatar = d.user.avatar || 'https://example.com/default.png';
                     document.getElementById('nav-avatar-img').src = avatar;
@@ -307,7 +241,6 @@
                 }
             } catch(e) {}
         }
-        
         async function doLogin() {
             const u = document.getElementById('l-user').value;
             const p = document.getElementById('l-pass').value;
@@ -320,54 +253,107 @@
                 if(d.success) location.reload(); else alert(d.msg);
             } catch(e){}
         }
-
-        async function logout() {
-            await fetch('/api/auth/logout');
-            location.reload();
+        async function doRegister() {
+            const u = document.getElementById('r-user').value;
+            const n = document.getElementById('r-nick').value;
+            const p = document.getElementById('r-pass').value;
+            if(!u || !p) { alert("必填"); return; }
+            try {
+                const res = await fetch('/api/auth/register', {
+                    method:'POST', headers:{'Content-Type':'application/json'},
+                    body: JSON.stringify({username:u, nickname:n, password:p})
+                });
+                const d = await res.json();
+                if(d.success) { alert("注册成功"); closeModal('registerModal'); openModal('loginModal'); }
+                else alert(d.msg);
+            } catch(e){}
         }
+        async function logout() { await fetch('/api/auth/logout'); location.reload(); }
 
-        // --- 2. 核心功能：编辑头像 ---
-        function triggerAvatarUpload() {
-            // 模拟点击隐藏的文件输入框
-            document.getElementById('avatar-upload-input').click();
-        }
-
-        // 监听文件选择变化
+        // --- Avatar ---
+        function triggerAvatarUpload() { document.getElementById('avatar-upload-input').click(); }
         document.getElementById('avatar-upload-input').onchange = async function() {
             const file = this.files[0];
             if(!file) return;
-
-            const formData = new FormData();
-            formData.append('file', file);
-
+            const formData = new FormData(); formData.append('file', file);
             try {
-                // 调用后端更新接口
-                const res = await fetch('/api/user/update-avatar', {
-                    method: 'POST',
-                    body: formData
-                });
+                const res = await fetch('/api/user/update-avatar', { method:'POST', body:formData });
                 const d = await res.json();
-
-                if(d.success) {
-                    alert("头像更新成功！");
-                    // 立即更新页面上的头像显示
-                    document.getElementById('nav-avatar-img').src = d.url;
-                    document.getElementById('post-bar-avatar').src = d.url;
-                } else {
-                    alert("上传失败: " + d.msg);
-                }
-            } catch(e) {
-                alert("网络错误");
-            }
+                if(d.success) location.reload(); else alert(d.msg);
+            } catch(e){}
         };
 
-        // --- 3. 渲染列表 (简化版) ---
-        async function loadFeed() {
-            const container = document.getElementById('feed-list');
+        // --- Publish ---
+        async function doPublish() {
+            const t = document.getElementById('p-title').value;
+            const c = document.getElementById('p-content').value;
+            const cat = document.getElementById('p-category').value; 
+            const f = document.getElementById('p-files');
+            const fd = new FormData(); 
+            fd.append('title', t); 
+            fd.append('content', c);
+            fd.append('category', cat); // 【新增】放入表单数据
+            for(let file of f.files) fd.append('files', file);
+            
+            const btn = document.querySelector('#publishModal .primary-btn');
+            btn.innerText = "Posting..."; btn.disabled = true;
             try {
-                const res = await fetch('/api/topic/list');
+                const res = await fetch('/api/topic/publish', { method:'POST', body:fd });
+                const d = await res.json();
+                if(d.success) location.reload(); else { alert(d.msg); btn.disabled=false; btn.innerText="Post"; }
+            } catch(e){ alert("Error"); btn.disabled=false; btn.innerText="Post"; }
+        }
+
+        // --- 核心：投票功能 ---
+        async function vote(e, topicId, type) {
+            e.stopPropagation(); // 防止点击跳转详情
+            
+            // 乐观 UI 更新：先在界面上改数字，再发请求（体验更快）
+            const countEl = document.getElementById(`vote-count-${topicId}`);
+            let current = parseInt(countEl.innerText);
+            // 这里简单处理，暂时不判断重复点，让后端去计算最终结果
+            
+            try {
+                const res = await fetch('/api/vote/toggle', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ topicId: topicId, type: type })
+                });
+                const d = await res.json();
+                if(d.success) {
+                    // 后端返回了最新的准确分数，更新上去
+                    countEl.innerText = d.newScore;
+                    
+                    // 简单的视觉反馈：让数字变色一下
+                    countEl.style.color = type === 1 ? '#D93A00' : '#7193FF';
+                } else {
+                    alert(d.msg); // 未登录会提示
+                }
+            } catch(e) { console.error(e); }
+        }
+
+        // --- Render List ---
+        // 【修改】函数接收一个 category 参数，默认为 'All'
+        async function loadFeed(category = 'All') {
+            const container = document.getElementById('feed-list');
+            container.innerHTML = "Loading..."; // 切换分类时显示加载中
+
+            // 【修改】高亮当前选中的左侧菜单 (可选优化体验)
+            document.querySelectorAll('.sidebar-left .nav-item').forEach(el => {
+                el.style.backgroundColor = ''; // 清除所有高亮
+                if(el.innerText.includes(category) || (category==='All' && el.innerText.includes('Home'))) {
+                    el.style.backgroundColor = '#e6e9ea'; // 高亮当前
+                }
+            });
+
+            try {
+                // 【修改】请求带上参数
+                const res = await fetch(`/api/topic/list?category=${category}`);
                 const list = await res.json();
                 container.innerHTML = "";
+                
+                if(list.length === 0) { container.innerHTML = '<div style="text-align:center; padding:20px;">No posts yet.</div>'; return; }
+
                 list.forEach(topic => {
                     let mediaHtml = "";
                     if(topic.mediaList && topic.mediaList.length > 0) {
@@ -378,9 +364,21 @@
                     
                     const div = document.createElement('div');
                     div.className = 'post-card';
-                    div.onclick = () => window.location.href = `topic_detail.html?id=${topic.id}`;
+                    div.onclick = (e) => {
+                         // 如果点的是视频控件，不跳转
+                        if(e.target.tagName !== 'VIDEO' && e.target.className !== 'vote-btn') 
+                            window.location.href = `topic_detail.html?id=${topic.id}`;
+                    };
+                    
+                    // 注意：voteCount 默认为 null 时显示 0
+                    const votes = topic.voteCount || 0;
+
                     div.innerHTML = `
-                        <div class="vote-column"><div>⇧</div><div>0</div><div>⇩</div></div>
+                        <div class="vote-column" onclick="event.stopPropagation()">
+                            <div class="vote-btn up" onclick="vote(event, ${topic.id}, 1)">⇧</div>
+                            <div class="vote-count" id="vote-count-${topic.id}">${votes}</div>
+                            <div class="vote-btn down" onclick="vote(event, ${topic.id}, -1)">⇩</div>
+                        </div>
                         <div class="content-column">
                             <div style="font-size:12px; color:#787c7e; margin-bottom:5px;">Posted by ${topic.author?topic.author.nickname:'u/user'}</div>
                             <div style="font-weight:bold; font-size:18px; margin-bottom:10px;">${topic.title}</div>
