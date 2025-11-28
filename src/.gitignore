@@ -1,0 +1,21 @@
+# --- 编译产生的文件 (不需要传) ---
+target/
+*.class
+
+# --- VS Code 配置文件 (每个人电脑不一样，不传) ---
+.vscode/
+.settings/
+.classpath
+.project
+
+# --- 本地上传的图片/视频 (太大了，不要传到 GitHub) ---
+uploads/
+/files
+
+# --- 系统生成的垃圾文件 ---
+.DS_Store
+Thumbs.db
+
+# --- (可选) 如果你不想把数据库密码传上去，可以把这个也加进去 ---
+# 但作为练习项目，为了以后下载下来能直接跑，暂时先不屏蔽
+# src/main/resources/application.properties

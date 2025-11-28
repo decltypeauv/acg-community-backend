@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>话题详情 - ACG Forum</title>
+    <style>
+        /* 复用基础样式 */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: "PingFang SC", sans-serif; }
+        body { background-color: #f4f5f7; color: #18191c; padding-top: 20px; }
+        
+        /* 导航 */
+        .header { 
+            background: white; padding: 15px 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+            position: fixed; top: 0; left: 0; width: 100%; z-index: 100;
+        }
+        .back-link { color: #fb7299; font-weight: bold; text-decoration: none; font-size: 16px; }
+
+        .container { max-width: 800px; margin: 60px auto 20px; padding-bottom: 50px; }
+
+        /* --- 帖子主体 --- */
+        .topic-card { background: white; padding: 30px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .topic-title { font-size: 24px; font-weight: bold; margin-bottom: 10px; color: #222; }
+        .topic-info { color: #999; font-size: 13px; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #eee; display: flex; align-items: center; }
+        .u-avatar { width: 30px; height: 30px; border-radius: 50%; margin-right: 10px; border: 1px solid #eee; object-fit: cover; }
+        
+        .topic-content { font-size: 16px; line-height: 1.8; white-space: pre-wrap; color: #333; margin-bottom: 20px; }
+
+        /* --- 图片/视频展示区 (新增样式) --- */
+        .media-container {
+            display: flex; flex-direction: column; gap: 15px; /* 图片垂直排列，间距15px */
+        }
+        .media-item {
+            width: 100%; border-radius: 4px; overflow: hidden; background: #f9f9f9;
+        }
+        .media-item img { width: 100%; height: auto; display: block; }
+        .media-item video { width: 100%; height: auto; display: block; }
+
+        /* --- 评论区 --- */
+        .comment-section { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .section-header { font-size: 18px; font-weight: bold; margin-bottom: 20px; border-left: 4px solid #fb7299; padding-left: 10px; }
+
+        /* 输入框 */
+        .comment-input-box { margin-bottom: 30px; display: flex; gap: 10px; }
+        .c-input { flex: 1; height: 40px; border: 1px solid #ddd; border-radius: 4px; padding: 0 10px; outline: none; }
+        .c-input:focus { border-color: #fb7299; }
+        .c-btn { width: 80px; background: #fb7299; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .c-btn:hover { background: #e55b82; }
+
+        /* 评论列表 */
+        .comment-item { border-bottom: 1px solid #eee; padding: 15px 0; display: flex; gap: 15px; }
+        .c-avatar { width: 40px; height: 40px; background: #ddd; border-radius: 50%; object-fit: cover; }
+        .c-main { flex: 1; }
+        .c-user { font-size: 13px; font-weight: bold; color: #666; margin-bottom: 5px; }
+        .c-content { font-size: 14px; color: #222; margin-bottom: 5px; }
+        .c-time { font-size: 12px; color: #999; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <a href="index.html" class="back-link">← 返回首页</a>
+    </div>
+
+    <div class="container">
+        <!-- 帖子内容区 -->
+        <div class="topic-card" id="main-content">
+            <h1 class="topic-title">加载中...</h1>
+            
+            <div class="topic-info">
+                <img src="" class="u-avatar" id="author-avatar" style="display:none">
+                <span id="author-name">...</span>
+                <span style="margin: 0 5px">·</span>
+                <span id="publish-time">...</span>
+            </div>
+
+            <div class="topic-content"></div>
+
+            <!-- 【重点】这里是存放图片/视频的容器 -->
+            <div class="media-container" id="topic-media">
+                <!-- JS 会自动往这里塞图片 -->
+            </div>
+        </div>
+
+        <!-- 评论区 -->
+        <div class="comment-section">
+            <div class="section-header">评论区</div>
+            
+            <!-- 发表评论 -->
+            <div class="comment-input-box">
+                <input type="text" id="comment-text" class="c-input" placeholder="发条友善的评论吧...">
+                <button class="c-btn" onclick="postComment()">发送</button>
+            </div>
+
+            <!-- 评论列表 -->
+            <div id="comment-list">
+                <!-- JS生成 -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 1. 获取 URL 中的 ID 参数
+        const urlParams = new URLSearchParams(window.location.search);
+        const topicId = urlParams.get('id');
+
+        if (!topicId) {
+            alert("参数错误！");
+            window.location.href = "index.html";
+        }
+
+        // 2. 加载帖子详情 (包含图片渲染)
+        async function loadTopicDetail() {
+            try {
+                const res = await fetch('/api/topic/' + topicId);
+                const data = await res.json();
+                
+                if (!data || !data.title) {
+                    document.querySelector('.topic-title').innerText = "帖子不存在或已被删除";
+                    return;
+                }
+
+                // 渲染文字信息
+                document.querySelector('.topic-title').innerText = data.title;
+                document.querySelector('.topic-content').innerText = data.content;
+                
+                const authorName = data.author ? data.author.nickname : "匿名用户";
+                const avatar = data.author && data.author.avatar ? data.author.avatar : 'https://example.com/default.png';
+                const time = new Date(data.createdAt).toLocaleString();
+
+                document.getElementById('author-name').innerText = authorName;
+                document.getElementById('publish-time').innerText = time;
+                const avatarEl = document.getElementById('author-avatar');
+                avatarEl.src = avatar;
+                avatarEl.style.display = 'inline-block';
+
+                // 【核心新增】渲染图片和视频
+                const mediaBox = document.getElementById('topic-media');
+                mediaBox.innerHTML = ''; // 清空旧内容
+
+                if (data.mediaList && data.mediaList.length > 0) {
+                    data.mediaList.forEach(m => {
+                        const div = document.createElement('div');
+                        div.className = 'media-item';
+                        
+                        if (m.type === 'VIDEO') {
+                            div.innerHTML = `<video src="${m.url}" controls></video>`;
+                        } else {
+                            div.innerHTML = `<img src="${m.url}" loading="lazy">`;
+                        }
+                        mediaBox.appendChild(div);
+                    });
+                }
+
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        // 3. 加载评论列表
+        async function loadComments() {
+            try {
+                const res = await fetch('/api/comment/list?topicId=' + topicId);
+                const list = await res.json();
+                const container = document.getElementById('comment-list');
+                
+                container.innerHTML = ""; 
+
+                if (list.length === 0) {
+                    container.innerHTML = '<p style="color:#999; text-align:center;">暂无评论，快来抢沙发！</p>';
+                    return;
+                }
+
+                list.forEach(c => {
+                    const avatarUrl = c.user && c.user.avatar ? c.user.avatar : 'https://example.com/default.png';
+                    const nick = c.user ? c.user.nickname : '匿名';
+                    
+                    const item = document.createElement('div');
+                    item.className = 'comment-item';
+                    item.innerHTML = `
+                        <img src="${avatarUrl}" class="c-avatar">
+                        <div class="c-main">
+                            <div class="c-user">${nick}</div>
+                            <div class="c-content">${c.content}</div>
+                            <div class="c-time">${new Date(c.createdAt).toLocaleString()}</div>
+                        </div>
+                    `;
+                    container.appendChild(item);
+                });
+            } catch(e) { console.error(e); }
+        }
+
+        // 4. 发送评论
+        async function postComment() {
+            const content = document.getElementById('comment-text').value;
+            if (!content) return;
+
+            try {
+                const res = await fetch('/api/comment/add', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        topicId: topicId,
+                        content: content
+                    })
+                });
+                
+                const result = await res.json();
+                if (result.success) {
+                    document.getElementById('comment-text').value = ""; // 清空输入框
+                    loadComments(); // 刷新评论列表
+                } else {
+                    alert(result.msg); 
+                }
+            } catch(e) { alert("发送失败"); }
+        }
+
+        // 初始化
+        window.onload = function() {
+            loadTopicDetail();
+            loadComments();
+        };
+
+    </script>
+</body>
+</html>

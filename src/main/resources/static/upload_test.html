@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>上传测试</title>
+</head>
+<body>
+    <h2>1. 第一步：先登录</h2>
+    <!-- 这是一个简单的登录表单 -->
+    <div>
+        账号：<input type="text" id="username" value="shamiko"><br>
+        密码：<input type="password" id="password" value="123"><br>
+        <button onclick="login()">登录</button>
+    </div>
+    <p id="login-status" style="color:red;">未登录</p>
+
+    <hr>
+
+    <h2>2. 第二步：上传图片</h2>
+    <!-- 这是一个简单的上传表单 -->
+    <div>
+        标题：<input type="text" id="imgTitle" value="测试图片"><br>
+        文件：<input type="file" id="imgFile"><br>
+        <button onclick="upload()">上传</button>
+    </div>
+    <p id="upload-result"></p>
+    
+    <!-- 这里显示上传后的图片 -->
+    <img id="preview" src="" style="max-width: 300px; margin-top: 20px;">
+
+    <script>
+        // 登录函数
+        async function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            const res = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({username, password})
+            });
+            const data = await res.json();
+            
+            if(data.success) {
+                document.getElementById('login-status').innerText = "登录成功！可以上传了";
+                document.getElementById('login-status').style.color = "green";
+            } else {
+                alert(data.msg);
+            }
+        }
+
+        // 上传函数
+        async function upload() {
+            const fileInput = document.getElementById('imgFile');
+            const titleInput = document.getElementById('imgTitle');
+            
+            if(fileInput.files.length === 0) {
+                alert("请选择文件");
+                return;
+            }
+
+            // 构建 FormData 对象 (代替 JSON)
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            formData.append('title', titleInput.value);
+
+            try {
+                const res = await fetch('/api/media/upload', {
+                    method: 'POST',
+                    body: formData // fetch 会自动处理 Content-Type，不要手动加 header
+                });
+                const data = await res.json();
+
+                if(data.success) {
+                    document.getElementById('upload-result').innerText = "上传成功: " + data.url;
+                    // 显示图片
+                    document.getElementById('preview').src = data.url;
+                } else {
+                    document.getElementById('upload-result').innerText = "失败: " + data.msg;
+                }
+            } catch (e) {
+                console.error(e);
+                alert("上传出错");
+            }
+        }
+    </script>
+</body>
+</html>

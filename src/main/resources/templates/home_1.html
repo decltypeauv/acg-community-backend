@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>首页 - home_1</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .welcome {
+            text-align: center;
+            color: #666;
+            font-size: 18px;
+            margin-bottom: 30px;
+        }
+        .info-box {
+            background: #e7f3ff;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>(^_^)欢迎来到萌萌乐园！(^_^)</h1>
+        <div class="welcome">
+            🎉 恭喜！Spring Boot项目成功运行！
+        </div>
+        
+        <div class="info-box">
+            <h3>项目信息：</h3>
+            <p><strong>当前时间：</strong> <span th:text="${#dates.format(#dates.createNow(), 'yyyy-MM-dd HH:mm:ss')}"></span></p>
+            <p><strong>服务器：</strong> Spring Boot 3.x</p>
+            <p><strong>模板引擎：</strong> Thymeleaf</p>
+        </div>
+        
+        <h2>功能列表</h2>
+        <ul>
+            <li>✅ Spring Boot 3.x 框架</li>
+            <li>✅ Thymeleaf 模板引擎</li>
+            <li>✅ 自动热重载（DevTools）</li>
+            <li>✅ 响应式设计</li>
+        </ul>
+        
+        <div style="text-align: center; margin-top: 30px;">
+            <a href="/home_1" style="padding: 10px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 5px;">
+                刷新页面
+            </a>
+        </div>
+    </div>
+</body>
+</html>

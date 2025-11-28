@@ -1,0 +1,115 @@
+package com.acgforum.acgbackend.controller;
+
+import com.acgforum.acgbackend.entity.Media;
+import com.acgforum.acgbackend.entity.Topic;
+import com.acgforum.acgbackend.entity.User;
+import com.acgforum.acgbackend.repository.MediaRepository;
+import com.acgforum.acgbackend.repository.TopicRepository;
+import jakarta.servlet.http.HttpSession;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
+
+@RestController
+@RequestMapping("/api/topic")
+public class TopicController {
+
+    @Autowired
+    private TopicRepository topicRepository;
+
+    @Autowired
+    private MediaRepository mediaRepository;
+
+    // 读取配置文件里的上传路径
+    @Value("${file.upload-dir}")
+    private String uploadDir;
+
+    // 【核心升级】发布话题（支持带附件）
+    // 注意：这里不用 @RequestBody，因为要接收文件流，直接用参数接收
+    @PostMapping("/publish")
+    public Map<String, Object> publish(
+            @RequestParam("title") String title,
+            @RequestParam("content") String content,
+            @RequestParam(value = "files", required = false) MultipartFile[] files, // 允许不传图，也可以传多个
+            HttpSession session) {
+        
+        Map<String, Object> result = new HashMap<>();
+
+        // 1. 检查登录
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            result.put("success", false);
+            result.put("msg", "请先登录");
+            return result;
+        }
+
+        // 2. 保存帖子本体
+        Topic topic = new Topic();
+        topic.setTitle(title);
+        topic.setContent(content);
+        topic.setAuthor(user);
+        Topic savedTopic = topicRepository.save(topic); // 先保存，拿到 ID
+
+        // 3. 处理附件 (如果有)
+        if (files != null && files.length > 0) {
+            File directory = new File(uploadDir);
+            if (!directory.exists()) directory.mkdirs();
+
+            List<Media> mediaList = new ArrayList<>();
+
+            for (MultipartFile file : files) {
+                if (file.isEmpty()) continue;
+
+                try {
+                    // 生成文件名
+                    String originalFilename = file.getOriginalFilename();
+                    String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+                    String newFilename = UUID.randomUUID().toString() + extension;
+
+                    // 存硬盘
+                    File dest = new File(directory.getAbsolutePath() + File.separator + newFilename);
+                    file.transferTo(dest);
+
+                    // 存数据库
+                    Media media = new Media();
+                    media.setTitle("附件"); // 暂时叫附件，也可以前端传
+                    media.setFilename(newFilename);
+                    media.setUrl("/files/" + newFilename);
+                    // 判断类型
+                    String type = extension.toLowerCase().matches(".*(mp4|avi|mov)$") ? "VIDEO" : "IMAGE";
+                    media.setType(type);
+                    
+                    media.setUploader(user);
+                    media.setTopic(savedTopic); // 【关键】关联到刚才创建的帖子
+
+                    mediaRepository.save(media);
+                    
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    // 这里可以记录日志，暂不打断
+                }
+            }
+        }
+
+        result.put("success", true);
+        result.put("msg", "发布成功");
+        return result;
+    }
+
+    // 获取列表 (Entity 修改后，这里自动会带出 mediaList)
+    @GetMapping("/list")
+    public List<Topic> getTopicList() {
+        return topicRepository.findAllByOrderByCreatedAtDesc();
+    }
+    
+    // 获取详情
+    @GetMapping("/{id}")
+    public Topic getTopicDetail(@PathVariable Long id) {
+        return topicRepository.findById(id).orElse(null);
+    }
+}

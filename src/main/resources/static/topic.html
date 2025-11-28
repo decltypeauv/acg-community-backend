@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>ACG 社区 - 话题广场</title>
+    <style>
+        /* 复用部分全局样式 */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
+        body { background-color: #f4f5f7; color: #18191c; }
+        
+        /* 简单的顶栏 */
+        .header { background: white; padding: 15px 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: space-between; }
+        .logo { font-weight: bold; color: #fb7299; font-size: 20px; text-decoration: none; }
+
+        /* 布局容器 */
+        .container { max-width: 1000px; margin: 20px auto; display: flex; gap: 20px; }
+        
+        /* 左侧列表 */
+        .topic-list { flex: 3; background: white; border-radius: 8px; padding: 20px; min-height: 500px; }
+        
+        .topic-item { border-bottom: 1px solid #eee; padding: 15px 0; }
+        .topic-title { font-size: 18px; font-weight: bold; margin-bottom: 8px; color: #222; }
+        .topic-meta { font-size: 12px; color: #999; }
+        .topic-content-preview { color: #666; font-size: 14px; margin-top: 5px; line-height: 1.5; }
+
+        /* 右侧发布框 */
+        .sidebar { flex: 1; }
+        .create-box { background: white; padding: 20px; border-radius: 8px; position: sticky; top: 20px; }
+        .form-title { font-weight: bold; margin-bottom: 15px; }
+        
+        input, textarea { width: 100%; border: 1px solid #ddd; border-radius: 4px; padding: 10px; margin-bottom: 10px; outline: none; }
+        textarea { height: 100px; resize: none; }
+        
+        .btn { width: 100%; background: #fb7299; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .btn:hover { background: #e55b82; }
+
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <a href="index.html" class="logo">← 返回 ACG 首页</a>
+        <div id="user-info"></div>
+    </div>
+
+    <div class="container">
+        <!-- 左侧：话题列表 -->
+        <div class="topic-list" id="topic-list">
+            <p>正在加载话题...</p>
+        </div>
+
+        <!-- 右侧：发布框 -->
+        <div class="sidebar">
+            <div class="create-box">
+                <div class="form-title">发布新话题</div>
+                <input type="text" id="t-title" placeholder="标题...">
+                <textarea id="t-content" placeholder="分享你的二次元见闻..."></textarea>
+                <button class="btn" onclick="publishTopic()">发布</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 1. 加载话题列表
+        async function loadTopics() {
+            const res = await fetch('/api/topic/list');
+            const topics = await res.json();
+            const listDiv = document.getElementById('topic-list');
+            
+            listDiv.innerHTML = '';
+            
+            if (topics.length === 0) {
+                listDiv.innerHTML = '<p style="text-align:center; color:#999">暂时没有话题，抢个沙发吧！</p>';
+                return;
+            }
+
+            topics.forEach(t => {
+                const div = document.createElement('div');
+                div.className = 'topic-item';
+                div.innerHTML = `
+                    <!-- 点击标题跳转，带上 ID -->
+                    <a href="topic_detail.html?id=${t.id}" class="topic-title" style="text-decoration:none; display:block; cursor:pointer;">
+                        ${t.title}
+                    </a>
+                    <div class="topic-content-preview">${t.content}</div>
+                    <div class="topic-meta">
+                        作者: ${t.author ? t.author.nickname : '匿名'} · 
+                        时间: ${new Date(t.createdAt).toLocaleString()}
+                    </div>
+                `;
+                listDiv.appendChild(div);
+            });
+        }
+
+        // 2. 发布话题
+        async function publishTopic() {
+            const title = document.getElementById('t-title').value;
+            const content = document.getElementById('t-content').value;
+
+            if(!title || !content) { alert("写点什么再发吧！"); return; }
+
+            const res = await fetch('/api/topic/create', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({title, content})
+            });
+            
+            const data = await res.json();
+            if(data.success) {
+                alert("发布成功！");
+                document.getElementById('t-title').value = "";
+                document.getElementById('t-content').value = "";
+                loadTopics(); // 刷新列表
+            } else {
+                alert("失败：" + data.msg); // 如果没登录，这里会提示
+            }
+        }
+
+        // 3. 检查登录状态（为了显示右上角，或者判断能不能发）
+        // 这里简化处理，未登录也可以看，但点发布会报错
+        
+        loadTopics();
+    </script>
+</body>
+</html>
