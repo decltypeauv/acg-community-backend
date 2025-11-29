@@ -104,14 +104,38 @@ public class TopicController {
     }
 
     // 获取列表 (Entity 修改后，这里自动会带出 mediaList)
+   // 获取列表 (支持：分类筛选、搜索、排序)
     @GetMapping("/list")
-    public List<Topic> getTopicList(@RequestParam(required = false) String category) {
-        if (category != null && !category.isEmpty() && !category.equals("All")) {
-            // 如果传了分类，就只查那个分类
-            return topicRepository.findByCategoryOrderByCreatedAtDesc(category);
+    public List<Topic> getTopicList(
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(defaultValue = "New") String sort // New (最新) 或 Top (高分)
+    ) {
+        List<Topic> list;
+
+        // 1. 先判断是不是搜索 (搜索优先级最高)
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            list = topicRepository.findByTitleContainingIgnoreCaseOrderByCreatedAtDesc(keyword);
+        } 
+        // 2. 再判断是不是按分类查
+        else if (category != null && !category.isEmpty() && !category.equals("All")) {
+            // 如果是分类，还要看是按时间(New)还是按票数(Top)
+            if ("Top".equals(sort)) {
+                list = topicRepository.findByCategoryOrderByVoteCountDesc(category);
+            } else {
+                list = topicRepository.findByCategoryOrderByCreatedAtDesc(category);
+            }
+        } 
+        // 3. 查所有
+        else {
+            if ("Top".equals(sort)) {
+                list = topicRepository.findAllByOrderByVoteCountDesc();
+            } else {
+                list = topicRepository.findAllByOrderByCreatedAtDesc();
+            }
         }
-        // 否则查所有
-        return topicRepository.findAllByOrderByCreatedAtDesc();
+        
+        return list;
     }
     
     // 获取详情

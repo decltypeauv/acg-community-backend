@@ -9,4 +9,12 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
     List<Topic> findAllByOrderByCreatedAtDesc();
     // 【新增】只查找特定分类的帖子
     List<Topic> findByCategoryOrderByCreatedAtDesc(String category);
+     // 【新增】搜索功能：标题包含 keyword (忽略大小写)
+    List<Topic> findByTitleContainingIgnoreCaseOrderByCreatedAtDesc(String keyword);
+    
+    // 【新增】Top 榜：按票数倒序查所有
+    List<Topic> findAllByOrderByVoteCountDesc();
+    
+    // 【新增】分类下的 Top 榜
+    List<Topic> findByCategoryOrderByVoteCountDesc(String category);
 }

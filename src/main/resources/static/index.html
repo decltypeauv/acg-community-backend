@@ -5,14 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ACG Reddit - 首页</title>
     <style>
-        /* --- Reddit 风格变量 --- */
+        /* --- 1. 核心变量 --- */
         :root {
             --bg-body: #DAE0E6;
             --bg-card: #FFFFFF;
             --text-main: #1c1c1c;
             --text-meta: #787c7e;
-            --color-primary: #D93A00; /* Reddit Orange */
-            --color-blue: #7193FF;    /* Reddit Blue */
+            --color-primary: #D93A00;
+            --color-blue: #0079D3;
             --hover-bg: #f6f7f8;
         }
 
@@ -20,7 +20,7 @@
         body { background-color: var(--bg-body); color: var(--text-main); padding-top: 50px; }
         a { text-decoration: none; color: inherit; cursor: pointer; }
 
-        /* --- 导航栏 --- */
+        /* --- 2. 导航栏 --- */
         .navbar {
             position: fixed; top: 0; left: 0; width: 100%; height: 48px;
             background: var(--bg-card); border-bottom: 1px solid #edeff1;
@@ -34,75 +34,109 @@
             width: 100%; height: 32px; background: #F6F7F8; border: 1px solid #EDEFF1; 
             border-radius: 16px; padding: 0 16px; outline: none; transition: 0.2s;
         }
-        .search-input:focus { background: white; border-color: #0079D3; }
+        .search-input:focus { background: white; border-color: var(--color-blue); }
 
-        /* 用户区 */
+        /* 右上角区域 */
         .nav-right-area { display: flex; align-items: center; height: 100%; }
-        .user-dropdown-container { position: relative; height: 100%; display: flex; align-items: center; padding: 0 5px; cursor: pointer; border: 1px solid transparent; }
-        .user-dropdown-container:hover { border: 1px solid #edeff1; }
-        .user-dropdown-container:hover .user-menu-dropdown { display: block; }
-
-        .nav-avatar-box { display: flex; align-items: center; gap: 8px; padding: 5px; border-radius: 4px; }
-        .nav-avatar { width: 30px; height: 30px; border-radius: 4px; background: #ddd; object-fit: cover; }
-        .nav-user-meta { display: flex; flex-direction: column; font-size: 12px; line-height: 1.2; margin-right: 5px; }
-        .nav-nickname { font-weight: bold; max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-        .user-menu-dropdown {
-            display: none; position: absolute; top: 48px; right: 0; width: 200px;
-            background: white; border: 1px solid #edeff1; border-radius: 0 0 4px 4px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1); padding: 10px 0; z-index: 1100;
-        }
-        .menu-item { padding: 10px 20px; font-size: 14px; display: flex; align-items: center; gap: 10px; transition: 0.2s; }
-        .menu-item:hover { background: #E8F0FE; }
         
         .btn-auth { padding: 6px 20px; border-radius: 99px; font-weight: bold; font-size: 14px; cursor: pointer; }
         .btn-login { background: var(--color-primary); color: white; border: none; }
-        .btn-outline { border: 1px solid #0079D3; color: #0079D3; background: transparent; }
+        .btn-outline { border: 1px solid var(--color-blue); color: var(--color-blue); background: transparent; }
 
-        /* --- 主布局 --- */
+        .user-dropdown-container { 
+            height: 100%; display: flex; align-items: center; padding: 0 5px; 
+            cursor: pointer; border: 1px solid transparent; 
+        }
+        .user-dropdown-container:hover { border: 1px solid #edeff1; }
+
+        .nav-avatar-box { display: flex; align-items: center; gap: 4px; padding: 2px; }
+        .nav-avatar { width: 30px; height: 30px; border-radius: 4px; background: #ddd; object-fit: cover; }
+
+        /* --- 3. 下拉菜单 (Reddit 复刻版样式) --- */
+        .user-menu-dropdown {
+            display: none; /* 默认隐藏 */
+            position: fixed; top: 48px; right: 0; /* 贴紧右侧 */
+            width: 280px; background: white; 
+            border-left: 1px solid #000000;
+            border-bottom: 1px solid #000000;
+            border-radius: 0 0 0 8px; 
+            box-shadow: -2px 0 8px rgba(0,0,0,0.1);
+            z-index: 1100; overflow-y: auto;
+        }
+        .user-menu-dropdown.show { display: block; }
+
+        /* 菜单内部项样式 (这一段之前可能漏了) */
+        .drawer-item {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 12px 16px; cursor: pointer; color: inherit; transition: background 0.1s;
+        }
+        .drawer-item:hover { background-color: #f2f4f5; }
+        .drawer-left { display: flex; align-items: center; gap: 12px; overflow: hidden; width: 100%; }
+        .drawer-icon { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; color: #1c1c1c; }
+        
+        .drawer-text-box { display: flex; flex-direction: column; }
+        .drawer-title { font-size: 14px; font-weight: 500; color: #1c1c1c; }
+        .drawer-subtitle { font-size: 12px; color: #787c7e; }
+
+        .profile-header { padding: 12px 16px; }
+        .drawer-avatar-frame { width: 40px; height: 40px; position: relative; flex-shrink: 0; }
+        .drawer-avatar-img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+        .status-dot { position: absolute; bottom: 0; right: 0; width: 10px; height: 10px; background: #46D160; border: 2px solid white; border-radius: 50%; }
+        .drawer-divider { height: 1px; background-color: #edeff1; margin: 8px 0; }
+
+        .toggle-switch { width: 36px; height: 22px; background: #e6e6e6; border-radius: 20px; position: relative; }
+        .toggle-knob { width: 18px; height: 18px; background: white; border-radius: 50%; position: absolute; top: 2px; left: 2px; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+
+        /* --- 4. 主布局 --- */
         .layout-container { display: grid; grid-template-columns: 270px 1fr 310px; gap: 24px; max-width: 1600px; margin: 20px auto; padding: 0 24px; }
-        .sidebar-left { display: flex; flex-direction: column; gap: 5px; font-size: 14px; 
-            position: sticky;/* 开启粘性定位 */top: 60px;/* 距离顶部 60px 时停住 (因为顶部导航栏约 50px) */height: fit-content;
-            /* 高度仅包裹内容，不要撑满全屏，否则 sticky 没法动 */}
+        
+        .sidebar-left { 
+            display: flex; flex-direction: column; gap: 5px; font-size: 14px; 
+            position: sticky; top: 60px; height: fit-content; /* 侧边栏跟随 */
+        }
         .nav-item { padding: 8px 12px; border-radius: 4px; cursor: pointer; color: var(--text-main); }
         .nav-item:hover { background-color: var(--hover-bg); }
-        
+        .nav-item.active { background-color: #e6e9ea; font-weight: bold; }
+        .section-header { font-size: 10px; text-transform: uppercase; color: var(--text-meta); margin: 15px 0 5px 12px; font-weight: bold; }
+
         .main-feed { min-width: 0; }
-        .sidebar-right { display: flex; flex-direction: column; gap: 16px; 
-            position: sticky;/* 开启粘性定位 */top: 60px;/* 距离顶部 60px 时停住 (因为顶部导航栏约 50px) */height: fit-content;
-            /* 高度仅包裹内容，不要撑满全屏，否则 sticky 没法动 */}
+
+        .sidebar-right { 
+            display: flex; flex-direction: column; gap: 16px; 
+            position: sticky; top: 60px; height: fit-content; /* 侧边栏跟随 */
+        }
         
-        /* 帖子卡片样式 */
+        /* 排序栏 */
+        .sort-bar { margin-bottom: 15px; display: flex; gap: 10px; }
+        .sort-btn { background: none; border: none; font-weight: bold; color: var(--text-meta); padding: 5px 10px; border-radius: 20px; cursor: pointer; }
+        .sort-btn:hover { background: #e6e9ea; }
+        .sort-btn.active { color: var(--color-blue); background: #f2f8fc; }
+
+        /* 帖子卡片 */
         .post-card { background: var(--bg-card); border: 1px solid #ccc; border-radius: 4px; margin-bottom: 10px; display: flex; cursor: pointer; }
         .post-card:hover { border-color: #898989; }
-        
-        /* --- 投票列 (新增样式) --- */
         .vote-column { width: 40px; background: #F8F9FA; display: flex; flex-direction: column; align-items: center; padding-top: 8px; border-radius: 4px 0 0 4px; }
-        .vote-btn { font-size: 20px; color: #878A8C; cursor: pointer; font-weight: bold; padding: 2px 5px; border-radius: 2px; }
+        .vote-btn { font-size: 20px; color: #878A8C; cursor: pointer; font-weight: bold; padding: 2px 5px; }
         .vote-btn:hover { background: #E8E8E8; }
         .vote-count { font-size: 13px; font-weight: bold; margin: 5px 0; }
-
-        /* 激活状态 */
-        .vote-btn.up.active { color: var(--color-primary); }
-        .vote-btn.down.active { color: var(--color-blue); }
-        .vote-count.active-up { color: var(--color-primary); }
-        .vote-count.active-down { color: var(--color-blue); }
-
+        
         .content-column { flex: 1; padding: 8px; }
         .media-preview { background: black; display: flex; justify-content: center; margin-bottom: 10px; border-radius: 4px; overflow: hidden; }
-        .media-preview img, .media-preview video { max-width: 100%; max-height: 500px; }
+        .media-preview img, .media-preview video { max-width: 100%; max-height: 500px; object-fit: contain; }
 
         /* Widget */
         .widget-box { background: var(--bg-card); border: 1px solid #ccc; border-radius: 4px; overflow: hidden; }
-        .widget-header { background: #0079D3; color: white; padding: 10px; font-weight: bold; }
+        .widget-header { background: var(--color-blue); color: white; padding: 10px; font-weight: bold; }
         .widget-content { padding: 12px; }
+        .create-btn-full { width: 100%; background: var(--color-blue); color: white; font-weight: bold; height: 32px; border: none; border-radius: 99px; cursor: pointer; margin-top: 10px;}
 
         /* 弹窗通用 */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; display: none; justify-content: center; align-items: center; }
         .modal-overlay.active { display: flex; }
         .modal-box { background: white; width: 500px; padding: 20px; border-radius: 8px; }
+        .modal-header { display: flex; justify-content: space-between; margin-bottom: 15px; font-weight: bold; font-size: 18px; }
         .common-input { width: 100%; border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; border-radius: 4px; }
-        .primary-btn { width: 100%; background: #0079D3; color: white; padding: 10px; border: none; border-radius: 99px; cursor: pointer; }
+        .primary-btn { width: 100%; background: var(--color-blue); color: white; padding: 10px; border: none; border-radius: 99px; cursor: pointer; }
 
         @media (max-width: 1000px) { .sidebar-left { display: none; } .layout-container { grid-template-columns: 1fr 310px; } }
         @media (max-width: 700px) { .sidebar-right { display: none; } .layout-container { grid-template-columns: 1fr; } }
@@ -112,66 +146,126 @@
 
     <!-- 导航栏 -->
     <nav class="navbar">
-        <div class="nav-logo">
+        <a href="index.html" class="nav-logo">
             <div class="nav-logo-icon">A</div>
             <span>ACG Reddit</span>
-        </div>
+        </a>
         <div class="nav-search">
-            <input type="text" class="search-input" placeholder="Search ACG Community">
+            <input type="text" class="search-input" placeholder="Search ACG Community" 
+                   onkeydown="if(event.key === 'Enter') loadFeed(undefined, undefined, this.value)">
         </div>
         
         <div class="nav-right-area">
+            <!-- 1. 未登录区 -->
             <div id="guest-nav" style="display: flex; gap:10px;">
                 <button class="btn-auth btn-outline" onclick="openModal('registerModal')">Sign Up</button>
                 <button class="btn-auth btn-login" onclick="openModal('loginModal')">Log In</button>
             </div>
-            <div id="user-nav" class="user-dropdown-container" style="display: none;">
+
+            <!-- 2. 已登录区 (点击触发) -->
+            <div id="user-nav" class="user-dropdown-container" style="display: none;" onclick="toggleUserMenu(event)">
                 <div class="nav-avatar-box">
-                    <div class="nav-user-meta">
-                        <span id="nav-username" class="nav-nickname">User</span>
-                    </div>
+                    <!-- 这里没有昵称了，只有头像和箭头 -->
                     <img id="nav-avatar-img" class="nav-avatar" src="">
-                    <span>▼</span>
-                </div>
-                <div class="user-menu-dropdown">
-                    <div class="menu-item" onclick="triggerAvatarUpload()">📸 Edit Avatar</div>
-                    <div class="menu-item" onclick="logout()">🚪 Log Out</div>
                 </div>
             </div>
+            
+            <!-- 3. 下拉菜单 (完整内容) -->
+            <div id="user-menu" class="user-menu-dropdown">
+                <!-- 个人资料 -->
+                <div class="drawer-item profile-header" onclick="alert('功能待开发')">
+                    <div class="drawer-left">
+                        <div class="drawer-avatar-frame">
+                            <img id="drawer-avatar-img" class="drawer-avatar-img" src="https://example.com/default.png">
+                            <div class="status-dot"></div>
+                        </div>
+                        <div class="drawer-text-box">
+                            <span class="drawer-title">View Profile</span>
+                            <span class="drawer-subtitle" id="drawer-username">u/User</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="drawer-divider"></div>
+
+                <!-- 编辑头像 -->
+                <div class="drawer-item" onclick="triggerAvatarUpload()">
+                    <div class="drawer-left">
+                        <div class="drawer-icon">
+                            <svg fill="currentColor" height="20" viewBox="0 0 20 20" width="20"><path d="M14.362 2.916L18 6.602l-1.895 1.864-2.185-1.709-.01 8.357a1 1 0 01-1 .999H7.091a1 1 0 01-1-1l.002-8.308-2.204 1.652L2 6.602l3.639-3.686h1.264A3.173 3.173 0 0010 5.406a3.174 3.174 0 003.097-2.49h1.265zm0-1.8h-1.265a1.8 1.8 0 00-1.758 1.412A1.38 1.38 0 0110 3.606a1.382 1.382 0 01-1.34-1.078 1.8 1.8 0 00-1.758-1.412H5.638c-.481 0-.943.193-1.281.535L.719 5.337a1.798 1.798 0 00.02 2.549l1.889 1.855a1.8 1.8 0 001.665.47v4.9c-.002.748.29 1.451.818 1.98.529.529 1.232.82 1.98.82h5.819a2.804 2.804 0 002.8-2.796l.005-4.893a1.798 1.798 0 001.652-.475l1.895-1.864a1.8 1.8 0 00.019-2.548l-3.638-3.686a1.8 1.8 0 00-1.281-.536v.003z"></path></svg>
+                        </div>
+                        <span class="drawer-title">Edit Avatar</span>
+                    </div>
+                </div>
+
+                <!-- 占位功能 -->
+                <div class="drawer-item">
+                    <div class="drawer-left">
+                        <div class="drawer-icon">
+                            <svg fill="currentColor" height="20" viewBox="0 0 20 20" width="20"><path d="M16.7 4H15V2.9a.9.9 0 00-.9-.9H5.9a.9.9 0 00-.9.9V4H3.301A2.304 2.304 0 001 6.3v.8c0 2.529 1.933 4.592 4.396 4.849a5.01 5.01 0 003.704 2.96V17.2H6.501a.9.9 0 000 1.8h7a.9.9 0 000-1.8h-2.599v-2.291a5.01 5.01 0 003.703-2.96c2.463-.257 4.396-2.32 4.396-4.849v-.8c0-1.268-1.033-2.3-2.301-2.3zM2.801 7.1v-.8a.5.5 0 01.5-.5H5V10c0 .018.005.035.005.053A3.093 3.093 0 012.801 7.1zM10 13.2A3.204 3.204 0 016.8 10V3.8h6.399V10c0 1.765-1.434 3.2-3.199 3.2zm7.199-6.1a3.095 3.095 0 01-2.204 2.953c0-.018.005-.035.005-.053V5.8h1.7a.5.5 0 01.499.5v.8z"></path></svg>
+                        </div>
+                        <div class="drawer-text-box">
+                            <span class="drawer-title">Achievements</span>
+                            <span class="drawer-subtitle">6 unlocked</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 退出登录 -->
+                <div class="drawer-divider"></div>
+                <div class="drawer-item" onclick="logout()">
+                    <div class="drawer-left">
+                        <div class="drawer-icon">
+                            <svg fill="currentColor" height="20" viewBox="0 0 20 20" width="20"><path d="M13.701 1H6.298a3.299 3.299 0 00-3.299 3.299v8.402A3.299 3.299 0 006.298 16h.701v.858a2.26 2.26 0 002.255 2.259c.293 0 .594-.058.889-.184l5.487-2.347a2.257 2.257 0 001.369-2.075V4.299A3.298 3.298 0 0013.701 1zM7 6.767V14.2h-.701A1.5 1.5 0 014.8 12.701V4.299A1.5 1.5 0 016.299 2.8h6.494L8.37 4.692A2.257 2.257 0 007 6.767zm8.2 7.744a.457.457 0 01-.277.42l-5.487 2.347a.461.461 0 01-.181.039.46.46 0 01-.455-.459V6.767c0-.183.109-.348.277-.42L14.564 4a.461.461 0 01.181-.039.46.46 0 01.455.459v10.091zM10.3 9.7h1.8v2.585h-1.8V9.7z"></path></svg>
+                        </div>
+                        <span class="drawer-title">Log Out</span>
+                    </div>
+                </div>
+
+            </div>
+            
             <input type="file" id="avatar-upload-input" style="display: none;" accept="image/*">
         </div>
     </nav>
 
     <!-- 主布局 -->
     <div class="layout-container">
+        <!-- 左侧 -->
         <aside class="sidebar-left">
-            <!-- 点击 Home 显示所有 -->
             <div class="nav-item" onclick="loadFeed('All')">🏠 Home</div>
-            <div class="nav-item">🔥 Popular</div>
-            
+            <div class="nav-item" onclick="loadFeed(undefined, 'Top')">🔥 Popular</div>
             <div class="section-header">TOPICS</div>
-            <!-- 点击分类只看对应内容 -->
             <div class="nav-item" onclick="loadFeed('Game')">🎮 Gaming</div>
             <div class="nav-item" onclick="loadFeed('Anime')">📺 Anime</div>
             <div class="nav-item" onclick="loadFeed('Art')">🎨 Art</div>
-            
-            <!-- ... -->
         </aside>
 
+        <!-- 中间 -->
         <main class="main-feed">
-            <div style="background:white; padding:10px; border:1px solid #ccc; border-radius:4px; margin-bottom:15px; display:flex; align-items:center; gap:10px;">
-                <img id="post-bar-avatar" style="width:38px; height:38px; border-radius:50%; background:#ddd;" src="">
-                <input type="text" placeholder="Create Post" onclick="checkLoginAndOpenPublish()" style="flex:1; height:38px; border:1px solid #ddd; background:#f6f7f8; border-radius:4px; padding-left:10px;">
+            <div class="sort-bar">
+                <button class="sort-btn active" onclick="loadFeed(undefined, 'Top')">Hot</button>
+                <button class="sort-btn" onclick="loadFeed(undefined, 'New')">New</button>
+                <button class="sort-btn" onclick="loadFeed(undefined, 'Top')">Top</button>
             </div>
             <div id="feed-list">Loading...</div>
         </main>
 
+        <!-- 右侧 -->
         <aside class="sidebar-right">
             <div class="widget-box">
                 <div class="widget-header">About Community</div>
                 <div class="widget-content">
                     <p>Welcome to ACG Forum!</p>
-                    <button class="primary-btn" onclick="checkLoginAndOpenPublish()" style="margin-top:10px;">Create Post</button>
+                    <!-- 发帖入口 -->
+                    <button class="create-btn-full" onclick="checkLoginAndOpenPublish()">Create Post</button>
+                </div>
+            </div>
+            
+             <div class="widget-box">
+                <div class="widget-header" style="background: #1A1A1B;">r/Rules</div>
+                <div class="widget-content">
+                    <div style="border-bottom:1px solid #eee; padding:5px 0;">1. Be nice to syamiko</div>
+                    <div style="border-bottom:1px solid #eee; padding:5px 0;">2. No spoilers</div>
                 </div>
             </div>
         </aside>
@@ -180,53 +274,70 @@
     <!-- 弹窗 -->
     <div class="modal-overlay" id="loginModal">
         <div class="modal-box" style="width: 350px;">
-            <div style="font-weight:bold; margin-bottom:15px; font-size:18px;">Log In</div>
+            <div class="modal-header"><span>Log In</span><span style="cursor:pointer" onclick="closeModal('loginModal')">×</span></div>
             <input type="text" id="l-user" class="common-input" placeholder="Username">
             <input type="password" id="l-pass" class="common-input" placeholder="Password">
             <button class="primary-btn" onclick="doLogin()">Login</button>
-            <div style="margin-top:10px; text-align:right; cursor:pointer;" onclick="closeModal('loginModal')">Close</div>
+            <div style="font-size:12px; margin-top:10px;">New user? <span style="color:#0079D3; cursor:pointer;" onclick="switchModal('loginModal','registerModal')">Sign up</span></div>
         </div>
     </div>
     
-    <!-- 注册弹窗 -->
     <div class="modal-overlay" id="registerModal">
         <div class="modal-box" style="width: 350px;">
-            <div style="font-weight:bold; margin-bottom:15px; font-size:18px;">Sign Up</div>
+            <div class="modal-header"><span>Sign Up</span><span style="cursor:pointer" onclick="closeModal('registerModal')">×</span></div>
             <input type="text" id="r-user" class="common-input" placeholder="Username">
             <input type="text" id="r-nick" class="common-input" placeholder="Nickname">
             <input type="password" id="r-pass" class="common-input" placeholder="Password">
             <button class="primary-btn" onclick="doRegister()">Sign Up</button>
-            <div style="margin-top:10px; text-align:right; cursor:pointer;" onclick="closeModal('registerModal')">Close</div>
+            <div style="font-size:12px; margin-top:10px;">Has account? <span style="color:#0079D3; cursor:pointer;" onclick="switchModal('registerModal','loginModal')">Log in</span></div>
         </div>
     </div>
 
     <div class="modal-overlay" id="publishModal">
         <div class="modal-box" style="width: 600px;">
-            <div style="font-weight:bold; margin-bottom:15px; font-size:18px;">Create Post</div>
-            <!-- 【新增】分类选择器 -->
+            <div class="modal-header"><span>Create Post</span><span style="cursor:pointer" onclick="closeModal('publishModal')">×</span></div>
             <select id="p-category" class="common-input" style="background: white;">
-                <option value="General">General (综合)</option>
-                <option value="Anime">📺 Anime (动画)</option>
-                <option value="Game">🎮 Game (游戏)</option>
-                <option value="Art">🎨 Art (绘画)</option>
+                <option value="General">General</option>
+                <option value="Anime">📺 Anime</option>
+                <option value="Game">🎮 Game</option>
+                <option value="Art">🎨 Art</option>
             </select>
             <input type="text" id="p-title" class="common-input" placeholder="Title">
-            <textarea id="p-content" class="common-input" style="height:100px; resize:none;" placeholder="Content"></textarea>
+            <textarea id="p-content" class="common-input" style="height:120px; resize:none;" placeholder="Text (optional)"></textarea>
             <input type="file" id="p-files" multiple style="margin-bottom:10px;">
             <button class="primary-btn" onclick="doPublish()">Post</button>
-            <div style="margin-top:10px; text-align:right; cursor:pointer;" onclick="closeModal('publishModal')">Close</div>
         </div>
     </div>
 
     <script>
+        // --- 1. 全局状态 ---
+        let currentCategory = 'All';
+        let currentSort = 'New';
+        let currentKeyword = '';
+
+        // --- 2. 基础交互 ---
         function openModal(id) { document.getElementById(id).classList.add('active'); }
         function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+        function switchModal(c, o) { closeModal(c); openModal(o); }
         function checkLoginAndOpenPublish() {
             if(document.getElementById('guest-nav').style.display !== 'none') openModal('loginModal');
             else openModal('publishModal');
         }
+        
+        // 菜单切换
+        function toggleUserMenu(e) {
+            e.stopPropagation();
+            document.getElementById('user-menu').classList.toggle('show');
+        }
+        document.addEventListener('click', (e) => {
+            const menu = document.getElementById('user-menu');
+            const btn = document.getElementById('user-nav');
+            if(menu.classList.contains('show') && !menu.contains(e.target) && !btn.contains(e.target)) {
+                menu.classList.remove('show');
+            }
+        });
 
-        // --- Auth & User ---
+        // --- 3. 认证逻辑 ---
         async function checkLogin() {
             try {
                 const res = await fetch('/api/auth/check');
@@ -234,10 +345,14 @@
                 if(d.isLogin) {
                     document.getElementById('guest-nav').style.display = 'none';
                     document.getElementById('user-nav').style.display = 'flex';
-                    document.getElementById('nav-username').innerText = d.user.nickname;
+                    
                     const avatar = d.user.avatar || 'https://example.com/default.png';
                     document.getElementById('nav-avatar-img').src = avatar;
-                    document.getElementById('post-bar-avatar').src = avatar;
+
+                    if(document.getElementById('drawer-avatar-img')) {
+                         document.getElementById('drawer-avatar-img').src = avatar;
+                         document.getElementById('drawer-username').innerText = 'u/' + d.user.nickname;
+                    }
                 }
             } catch(e) {}
         }
@@ -264,35 +379,32 @@
                     body: JSON.stringify({username:u, nickname:n, password:p})
                 });
                 const d = await res.json();
-                if(d.success) { alert("注册成功"); closeModal('registerModal'); openModal('loginModal'); }
+                if(d.success) { alert("Success"); switchModal('registerModal','loginModal'); }
                 else alert(d.msg);
             } catch(e){}
         }
         async function logout() { await fetch('/api/auth/logout'); location.reload(); }
 
-        // --- Avatar ---
+        // --- 4. 业务逻辑 ---
         function triggerAvatarUpload() { document.getElementById('avatar-upload-input').click(); }
         document.getElementById('avatar-upload-input').onchange = async function() {
             const file = this.files[0];
             if(!file) return;
-            const formData = new FormData(); formData.append('file', file);
+            const fd = new FormData(); fd.append('file', file);
             try {
-                const res = await fetch('/api/user/update-avatar', { method:'POST', body:formData });
+                const res = await fetch('/api/user/update-avatar', { method:'POST', body:fd });
                 const d = await res.json();
                 if(d.success) location.reload(); else alert(d.msg);
             } catch(e){}
         };
 
-        // --- Publish ---
         async function doPublish() {
             const t = document.getElementById('p-title').value;
+            const cat = document.getElementById('p-category').value;
             const c = document.getElementById('p-content').value;
-            const cat = document.getElementById('p-category').value; 
             const f = document.getElementById('p-files');
             const fd = new FormData(); 
-            fd.append('title', t); 
-            fd.append('content', c);
-            fd.append('category', cat); // 【新增】放入表单数据
+            fd.append('title', t); fd.append('content', c); fd.append('category', cat);
             for(let file of f.files) fd.append('files', file);
             
             const btn = document.querySelector('#publishModal .primary-btn');
@@ -304,74 +416,73 @@
             } catch(e){ alert("Error"); btn.disabled=false; btn.innerText="Post"; }
         }
 
-        // --- 核心：投票功能 ---
         async function vote(e, topicId, type) {
-            e.stopPropagation(); // 防止点击跳转详情
-            
-            // 乐观 UI 更新：先在界面上改数字，再发请求（体验更快）
+            e.stopPropagation();
             const countEl = document.getElementById(`vote-count-${topicId}`);
-            let current = parseInt(countEl.innerText);
-            // 这里简单处理，暂时不判断重复点，让后端去计算最终结果
-            
             try {
                 const res = await fetch('/api/vote/toggle', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ topicId: topicId, type: type })
                 });
                 const d = await res.json();
                 if(d.success) {
-                    // 后端返回了最新的准确分数，更新上去
                     countEl.innerText = d.newScore;
-                    
-                    // 简单的视觉反馈：让数字变色一下
-                    countEl.style.color = type === 1 ? '#D93A00' : '#7193FF';
-                } else {
-                    alert(d.msg); // 未登录会提示
-                }
-            } catch(e) { console.error(e); }
+                    countEl.style.color = type === 1 ? '#D93A00' : '#0079D3';
+                } else alert(d.msg);
+            } catch(e) {}
         }
 
-        // --- Render List ---
-        // 【修改】函数接收一个 category 参数，默认为 'All'
-        async function loadFeed(category = 'All') {
+        // --- 5. 加载列表 ---
+        async function loadFeed(category, sort, keyword) {
             const container = document.getElementById('feed-list');
-            container.innerHTML = "Loading..."; // 切换分类时显示加载中
+            if (category !== undefined) currentCategory = category;
+            if (sort !== undefined) currentSort = sort;
+            if (keyword !== undefined) currentKeyword = keyword;
 
-            // 【修改】高亮当前选中的左侧菜单 (可选优化体验)
+            // Highlight UI
             document.querySelectorAll('.sidebar-left .nav-item').forEach(el => {
-                el.style.backgroundColor = ''; // 清除所有高亮
-                if(el.innerText.includes(category) || (category==='All' && el.innerText.includes('Home'))) {
-                    el.style.backgroundColor = '#e6e9ea'; // 高亮当前
+                el.style.backgroundColor = ''; 
+                if (!currentKeyword && (el.innerText.includes(currentCategory) || (currentCategory==='All' && el.innerText.includes('Home')))) {
+                    el.style.backgroundColor = '#e6e9ea';
                 }
             });
+            document.querySelectorAll('.sort-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.innerText === currentSort) btn.classList.add('active');
+            });
+
+            container.innerHTML = '<p style="text-align:center; margin-top:20px;">Loading...</p>';
 
             try {
-                // 【修改】请求带上参数
-                const res = await fetch(`/api/topic/list?category=${category}`);
+                let url = `/api/topic/list?sort=${currentSort}`;
+                if (currentKeyword) url += `&keyword=${encodeURIComponent(currentKeyword)}`;
+                else url += `&category=${currentCategory}`;
+
+                const res = await fetch(url);
                 const list = await res.json();
-                container.innerHTML = "";
                 
-                if(list.length === 0) { container.innerHTML = '<div style="text-align:center; padding:20px;">No posts yet.</div>'; return; }
+                container.innerHTML = "";
+                if(list.length === 0) { container.innerHTML = '<div style="text-align:center; padding:20px;">No posts found.</div>'; return; }
 
                 list.forEach(topic => {
+                    const avatar = topic.author && topic.author.avatar ? topic.author.avatar : 'https://example.com/default.png';
+                    const nickname = topic.author ? topic.author.nickname : 'u/Unknown';
+                    const time = new Date(topic.createdAt).toLocaleDateString();
+                    const votes = topic.voteCount || 0;
+
                     let mediaHtml = "";
                     if(topic.mediaList && topic.mediaList.length > 0) {
                         const m = topic.mediaList[0];
                         if(m.type==='VIDEO') mediaHtml=`<div class="media-preview"><video controls src="${m.url}"></video></div>`;
                         else mediaHtml=`<div class="media-preview"><img src="${m.url}"></div>`;
                     }
-                    
+
                     const div = document.createElement('div');
                     div.className = 'post-card';
                     div.onclick = (e) => {
-                         // 如果点的是视频控件，不跳转
                         if(e.target.tagName !== 'VIDEO' && e.target.className !== 'vote-btn') 
                             window.location.href = `topic_detail.html?id=${topic.id}`;
                     };
-                    
-                    // 注意：voteCount 默认为 null 时显示 0
-                    const votes = topic.voteCount || 0;
 
                     div.innerHTML = `
                         <div class="vote-column" onclick="event.stopPropagation()">
@@ -380,15 +491,19 @@
                             <div class="vote-btn down" onclick="vote(event, ${topic.id}, -1)">⇩</div>
                         </div>
                         <div class="content-column">
-                            <div style="font-size:12px; color:#787c7e; margin-bottom:5px;">Posted by ${topic.author?topic.author.nickname:'u/user'}</div>
+                            <div style="font-size:12px; color:#787c7e; margin-bottom:5px;">
+                                <span style="font-weight:bold; color:black;">r/${topic.category || 'General'}</span>
+                                • Posted by u/${nickname} • ${time}
+                            </div>
                             <div style="font-weight:bold; font-size:18px; margin-bottom:10px;">${topic.title}</div>
                             ${mediaHtml}
-                            <div style="color:#1c1c1c; font-size:14px;">${topic.content || ''}</div>
+                            <div style="color:#1c1c1c; font-size:14px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">${topic.content || ''}</div>
                         </div>
                     `;
                     container.appendChild(div);
                 });
-            } catch(e){}
+
+            } catch(e) { console.error(e); }
         }
 
         checkLogin();
