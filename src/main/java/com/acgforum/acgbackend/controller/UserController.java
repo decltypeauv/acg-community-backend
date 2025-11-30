@@ -80,4 +80,13 @@ public class UserController {
 
         return result;
     }
+    // 【新增】获取公开用户信息 (头像、昵称、注册时间)
+    @GetMapping("/{id}")
+    public User getUserProfile(@PathVariable Long id) {
+        User user = userRepository.findById(id).orElse(null);
+        if (user != null) {
+            user.setPassword(null); // 🔐 安全第一：千万别把密码返回给前端！
+        }
+        return user;
+    }
 }

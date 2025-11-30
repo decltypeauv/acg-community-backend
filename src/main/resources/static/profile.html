@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>User Profile</title>
+    <!-- 1. 引入公共 CSS -->
+    <link rel="stylesheet" href="css/global.css">
+    
+    <style>
+        /* 这里只写 Profile 页面特有的样式 */
+        .profile-card { background: white; border: 1px solid #ccc; border-radius: 4px; overflow: hidden; position: relative; }
+        .card-bg { height: 90px; background: #33a8ff; }
+        .card-avatar { width: 80px; height: 80px; border-radius: 6px; border: 4px solid white; background: #ddd; object-fit: cover; position: absolute; top: 50px; left: 20px; }
+        .card-info { padding: 40px 12px 12px 12px; text-align: center; }
+        .card-name { font-size: 22px; font-weight: bold; }
+        /* ... 其他 profile 特有样式 ... */
+    </style>
+</head>
+<body>
+
+    <!-- 2. 顶部导航占位符 -->
+    <div id="header-placeholder"></div>
+
+    <div class="layout-container">
+        <!-- 3. 左侧边栏占位符 -->
+        <div id="sidebar-placeholder"></div>
+
+        <!-- 中间内容 (页面的个性部分) -->
+        <main class="main-feed">
+            <h2 style="margin-bottom:20px;">User Posts</h2>
+            <div id="user-feed-list">Loading...</div>
+        </main>
+
+        <!-- 右侧内容 (页面的个性部分) -->
+        <aside class="sidebar-right">
+            <div class="profile-card">
+                <div class="card-bg"></div>
+                <img id="p-avatar" class="card-avatar" src="">
+                <div class="card-info">
+                    <div id="p-name" class="card-name">u/User</div>
+                    <div id="p-date" style="color:#777; font-size:12px;">Joined ...</div>
+                    <!-- ... -->
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- 4. 引入公共 JS -->
+    <script src="js/common.js"></script>
+    
+    <script>
+        // 1. 获取 URL 中的 userId 参数
+        const urlParams = new URLSearchParams(window.location.search);
+        const userId = urlParams.get('id');
+
+        // 如果没传 ID，跳回首页
+        if(!userId) {
+            alert("No User ID specified");
+            location.href = "index.html";
+        }
+        // 页面启动时，先加载公共组件，再跑自己的逻辑
+        window.onload = async function() {
+            await loadComponents(); // 等待导航栏加载完毕
+
+            // 然后再跑这个页面特有的逻辑 (比如加载用户信息)
+            loadUserProfile();
+            loadUserPosts();
+        };
+
+        // 2. 加载用户信息 (右侧卡片)
+        async function loadUserProfile() {
+            try {
+                const res = await fetch(`/api/user/${userId}`);
+                const user = await res.json();
+                
+                if(!user) return;
+
+                document.getElementById('p-name').innerText = "u/" + user.nickname;
+                const avatar = user.avatar || 'https://example.com/default.png';
+                document.getElementById('p-avatar').src = avatar;
+                
+                // 格式化日期
+                const joinDate = new Date(user.createdAt).toLocaleDateString();
+                document.getElementById('p-date').innerText = "Joined " + joinDate;
+
+            } catch(e) { console.error(e); }
+        }
+
+        // 3. 加载该用户的所有帖子 (中间列表)
+        async function loadUserPosts() {
+            const container = document.getElementById('user-feed-list');
+            try {
+                const res = await fetch(`/api/topic/user/${userId}`);
+                const list = await res.json();
+                
+                container.innerHTML = "";
+                
+                if(list.length === 0) {
+                    container.innerHTML = '<div style="text-align:center; padding:30px; color:#777">Hmm... u/' + document.getElementById('p-name').innerText + ' hasn\'t posted anything yet.</div>';
+                    return;
+                }
+                
+                // 计算总 karma (点赞数之和)
+                let totalKarma = 0;
+
+                list.forEach(topic => {
+                    totalKarma += (topic.voteCount || 0);
+
+                    // 渲染帖子 (复用 index.html 的逻辑)
+                    const avatar = topic.author && topic.author.avatar ? topic.author.avatar : 'https://example.com/default.png';
+                    const nickname = topic.author ? topic.author.nickname : 'u/Unknown';
+                    const time = new Date(topic.createdAt).toLocaleDateString();
+                    const votes = topic.voteCount || 0;
+
+                    let mediaHtml = "";
+                    if(topic.mediaList && topic.mediaList.length > 0) {
+                        const m = topic.mediaList[0];
+                        if(m.type==='VIDEO') mediaHtml=`<div class="media-preview"><video controls src="${m.url}"></video></div>`;
+                        else mediaHtml=`<div class="media-preview"><img src="${m.url}"></div>`;
+                    }
+
+                    const div = document.createElement('div');
+                    div.className = 'post-card';
+                    div.onclick = (e) => {
+                        if(e.target.tagName !== 'VIDEO') window.location.href = `topic_detail.html?id=${topic.id}`;
+                    };
+
+                    div.innerHTML = `
+                        <div class="vote-column">
+                            <div>⇧</div><div style="font-weight:bold; margin:5px 0;">${votes}</div><div>⇩</div>
+                        </div>
+                        <div class="content-column">
+                            <div style="font-size:12px; color:#787c7e; margin-bottom:5px;">
+                                <span style="font-weight:bold; color:black;">r/${topic.category || 'General'}</span>
+                                • Posted by u/${nickname} • ${time}
+                            </div>
+                            <div style="font-weight:bold; font-size:18px; margin-bottom:10px;">${topic.title}</div>
+                            ${mediaHtml}
+                            <div style="color:#1c1c1c; font-size:14px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">${topic.content || ''}</div>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                });
+                
+                // 更新右侧的 Karma 显示
+                document.getElementById('p-karma').innerText = totalKarma;
+
+            } catch(e) { console.error(e); }
+        }
+
+;
+    </script>
+</body>
+</html>

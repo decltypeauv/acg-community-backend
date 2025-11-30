@@ -1,0 +1,106 @@
+<!-- components/header.html -->
+<nav class="navbar">
+    <a href="index.html" class="nav-logo">
+        <div class="nav-logo-icon">A</div>
+        <span>ACG Reddit</span>
+    </a>
+    
+    <div class="nav-search">
+        <input type="text" class="search-input" placeholder="Search ACG Community" 
+               onkeydown="if(event.key === 'Enter') { window.location.href='index.html?search='+this.value }">
+    </div>
+    
+    <div class="nav-right-area">
+        <!-- 未登录状态 -->
+        <div id="guest-nav" style="display: flex; gap:10px;">
+            <button class="btn-auth btn-outline" onclick="openModal('registerModal')">Sign Up</button>
+            <button class="btn-auth btn-login" onclick="openModal('loginModal')">Log In</button>
+        </div>
+
+        <!-- 已登录状态 (点击触发) -->
+        <div id="user-nav" class="user-dropdown-container" style="display: none;">
+            <div class="nav-avatar-box">
+                <img id="nav-avatar-img" class="nav-avatar" src="">
+            </div>
+        </div>
+        
+        <!-- 下拉菜单 (完整复刻版) -->
+        <div id="user-menu" class="user-menu-dropdown">
+            <!-- 1. 个人资料头部 -->
+            <div class="drawer-item profile-header">
+                <div class="drawer-left">
+                    <div class="drawer-avatar-frame">
+                        <img id="drawer-avatar-img" class="drawer-avatar-img" src="">
+                        <div class="status-dot"></div>
+                    </div>
+                    <div class="drawer-text-box">
+                        <span class="drawer-title">View Profile</span>
+                        <span class="drawer-subtitle" id="drawer-username"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="drawer-divider"></div>
+
+            <!-- 2. 编辑头像 -->
+            <div class="drawer-item" onclick="triggerAvatarUpload()">
+                <div class="drawer-left">
+                    <div class="drawer-icon">
+                        <svg fill="currentColor" height="20" viewBox="0 0 20 20" width="20"><path d="M14.362 2.916L18 6.602l-1.895 1.864-2.185-1.709-.01 8.357a1 1 0 01-1 .999H7.091a1 1 0 01-1-1l.002-8.308-2.204 1.652L2 6.602l3.639-3.686h1.264A3.173 3.173 0 0010 5.406a3.174 3.174 0 003.097-2.49h1.265zm0-1.8h-1.265a1.8 1.8 0 00-1.758 1.412A1.38 1.38 0 0110 3.606a1.382 1.382 0 01-1.34-1.078 1.8 1.8 0 00-1.758-1.412H5.638c-.481 0-.943.193-1.281.535L.719 5.337a1.798 1.798 0 00.02 2.549l1.889 1.855a1.8 1.8 0 001.665.47v4.9c-.002.748.29 1.451.818 1.98.529.529 1.232.82 1.98.82h5.819a2.804 2.804 0 002.8-2.796l.005-4.893a1.798 1.798 0 001.652-.475l1.895-1.864a1.8 1.8 0 00.019-2.548l-3.638-3.686a1.8 1.8 0 00-1.281-.536v.003z"></path></svg>
+                    </div>
+                    <span class="drawer-title">Edit Avatar</span>
+                </div>
+            </div>
+
+            <!-- 3. 成就 (占位) -->
+            <div class="drawer-item">
+                <div class="drawer-left">
+                    <div class="drawer-icon">
+                        <svg fill="currentColor" height="20" viewBox="0 0 20 20" width="20"><path d="M16.7 4H15V2.9a.9.9 0 00-.9-.9H5.9a.9.9 0 00-.9.9V4H3.301A2.304 2.304 0 001 6.3v.8c0 2.529 1.933 4.592 4.396 4.849a5.01 5.01 0 003.704 2.96V17.2H6.501a.9.9 0 000 1.8h7a.9.9 0 000-1.8h-2.599v-2.291a5.01 5.01 0 003.703-2.96c2.463-.257 4.396-2.32 4.396-4.849v-.8c0-1.268-1.033-2.3-2.301-2.3zM2.801 7.1v-.8a.5.5 0 01.5-.5H5V10c0 .018.005.035.005.053A3.093 3.093 0 012.801 7.1zM10 13.2A3.204 3.204 0 016.8 10V3.8h6.399V10c0 1.765-1.434 3.2-3.199 3.2zm7.199-6.1a3.095 3.095 0 01-2.204 2.953c0-.018.005-.035.005-.053V5.8h1.7a.5.5 0 01.499.5v.8z"></path></svg>
+                    </div>
+                    <div class="drawer-text-box">
+                        <span class="drawer-title">Achievements</span>
+                        <span class="drawer-subtitle">6 unlocked</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="drawer-divider"></div>
+
+            <!-- 4. 退出登录 -->
+            <div class="drawer-item" onclick="logout()">
+                <div class="drawer-left">
+                    <div class="drawer-icon">
+                        <svg fill="currentColor" height="20" viewBox="0 0 20 20" width="20"><path d="M13.701 1H6.298a3.299 3.299 0 00-3.299 3.299v8.402A3.299 3.299 0 006.298 16h.701v.858a2.26 2.26 0 002.255 2.259c.293 0 .594-.058.889-.184l5.487-2.347a2.257 2.257 0 001.369-2.075V4.299A3.298 3.298 0 0013.701 1zM7 6.767V14.2h-.701A1.5 1.5 0 014.8 12.701V4.299A1.5 1.5 0 016.299 2.8h6.494L8.37 4.692A2.257 2.257 0 007 6.767zm8.2 7.744a.457.457 0 01-.277.42l-5.487 2.347a.461.461 0 01-.181.039.46.46 0 01-.455-.459V6.767c0-.183.109-.348.277-.42L14.564 4a.461.461 0 01.181-.039.46.46 0 01.455.459v10.091zM10.3 9.7h1.8v2.585h-1.8V9.7z"></path></svg>
+                    </div>
+                    <span class="drawer-title">Log Out</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 隐藏上传控件 -->
+        <input type="file" id="avatar-upload-input" style="display: none;" accept="image/*">
+    </div>
+</nav>
+
+<!-- 登录/注册弹窗 (公用) -->
+<div class="modal-overlay" id="loginModal">
+    <div class="modal-box" style="width: 350px;">
+        <div class="modal-header"><span>Log In</span><span style="cursor:pointer" onclick="closeModal('loginModal')">×</span></div>
+        <input type="text" id="l-user" class="common-input" placeholder="Username">
+        <input type="password" id="l-pass" class="common-input" placeholder="Password">
+        <button class="primary-btn" onclick="doLogin()">Login</button>
+        <div style="font-size:12px; margin-top:10px;">New user? <span style="color:#0079D3; cursor:pointer;" onclick="switchModal('loginModal','registerModal')">Sign up</span></div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="registerModal">
+    <div class="modal-box" style="width: 350px;">
+        <div class="modal-header"><span>Sign Up</span><span style="cursor:pointer" onclick="closeModal('registerModal')">×</span></div>
+        <input type="text" id="r-user" class="common-input" placeholder="Username">
+        <input type="text" id="r-nick" class="common-input" placeholder="Nickname">
+        <input type="password" id="r-pass" class="common-input" placeholder="Password">
+        <button class="primary-btn" onclick="doRegister()">Sign Up</button>
+        <div style="font-size:12px; margin-top:10px;">Has account? <span style="color:#0079D3; cursor:pointer;" onclick="switchModal('registerModal','loginModal')">Log in</span></div>
+    </div>
+</div>

@@ -17,4 +17,6 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
     
     // 【新增】分类下的 Top 榜
     List<Topic> findByCategoryOrderByVoteCountDesc(String category);
+    // 【新增】根据作者ID查询所有帖子
+    List<Topic> findByAuthorIdOrderByCreatedAtDesc(Long userId);
 }

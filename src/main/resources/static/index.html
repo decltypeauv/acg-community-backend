@@ -4,230 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ACG Reddit - 首页</title>
+    
+    <!-- ✅ 关键：确保这行引入了 global.css -->
+    <link rel="stylesheet" href="css/global.css">
+
+    <!-- 这里的 <style> 可以保留一些“仅首页特有”的微调，如果没有就不写 -->
     <style>
-        /* --- 1. 核心变量 --- */
-        :root {
-            --bg-body: #DAE0E6;
-            --bg-card: #FFFFFF;
-            --text-main: #1c1c1c;
-            --text-meta: #787c7e;
-            --color-primary: #D93A00;
-            --color-blue: #0079D3;
-            --hover-bg: #f6f7f8;
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; }
-        body { background-color: var(--bg-body); color: var(--text-main); padding-top: 50px; }
-        a { text-decoration: none; color: inherit; cursor: pointer; }
-
-        /* --- 2. 导航栏 --- */
-        .navbar {
-            position: fixed; top: 0; left: 0; width: 100%; height: 48px;
-            background: var(--bg-card); border-bottom: 1px solid #edeff1;
-            display: flex; align-items: center; justify-content: space-between; padding: 0 20px; z-index: 1000;
-        }
-        .nav-logo { display: flex; align-items: center; gap: 8px; font-weight: bold; font-size: 18px; }
-        .nav-logo-icon { width: 32px; height: 32px; background: var(--color-primary); border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; }
-        
-        .nav-search { flex: 1; max-width: 600px; margin: 0 20px; }
-        .search-input { 
-            width: 100%; height: 32px; background: #F6F7F8; border: 1px solid #EDEFF1; 
-            border-radius: 16px; padding: 0 16px; outline: none; transition: 0.2s;
-        }
-        .search-input:focus { background: white; border-color: var(--color-blue); }
-
-        /* 右上角区域 */
-        .nav-right-area { display: flex; align-items: center; height: 100%; }
-        
-        .btn-auth { padding: 6px 20px; border-radius: 99px; font-weight: bold; font-size: 14px; cursor: pointer; }
-        .btn-login { background: var(--color-primary); color: white; border: none; }
-        .btn-outline { border: 1px solid var(--color-blue); color: var(--color-blue); background: transparent; }
-
-        .user-dropdown-container { 
-            height: 100%; display: flex; align-items: center; padding: 0 5px; 
-            cursor: pointer; border: 1px solid transparent; 
-        }
-        .user-dropdown-container:hover { border: 1px solid #edeff1; }
-
-        .nav-avatar-box { display: flex; align-items: center; gap: 4px; padding: 2px; }
-        .nav-avatar { width: 30px; height: 30px; border-radius: 4px; background: #ddd; object-fit: cover; }
-
-        /* --- 3. 下拉菜单 (Reddit 复刻版样式) --- */
-        .user-menu-dropdown {
-            display: none; /* 默认隐藏 */
-            position: fixed; top: 48px; right: 0; /* 贴紧右侧 */
-            width: 280px; background: white; 
-            border-left: 1px solid #000000;
-            border-bottom: 1px solid #000000;
-            border-radius: 0 0 0 8px; 
-            box-shadow: -2px 0 8px rgba(0,0,0,0.1);
-            z-index: 1100; overflow-y: auto;
-        }
-        .user-menu-dropdown.show { display: block; }
-
-        /* 菜单内部项样式 (这一段之前可能漏了) */
-        .drawer-item {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 12px 16px; cursor: pointer; color: inherit; transition: background 0.1s;
-        }
-        .drawer-item:hover { background-color: #f2f4f5; }
-        .drawer-left { display: flex; align-items: center; gap: 12px; overflow: hidden; width: 100%; }
-        .drawer-icon { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; color: #1c1c1c; }
-        
-        .drawer-text-box { display: flex; flex-direction: column; }
-        .drawer-title { font-size: 14px; font-weight: 500; color: #1c1c1c; }
-        .drawer-subtitle { font-size: 12px; color: #787c7e; }
-
-        .profile-header { padding: 12px 16px; }
-        .drawer-avatar-frame { width: 40px; height: 40px; position: relative; flex-shrink: 0; }
-        .drawer-avatar-img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
-        .status-dot { position: absolute; bottom: 0; right: 0; width: 10px; height: 10px; background: #46D160; border: 2px solid white; border-radius: 50%; }
-        .drawer-divider { height: 1px; background-color: #edeff1; margin: 8px 0; }
-
-        .toggle-switch { width: 36px; height: 22px; background: #e6e6e6; border-radius: 20px; position: relative; }
-        .toggle-knob { width: 18px; height: 18px; background: white; border-radius: 50%; position: absolute; top: 2px; left: 2px; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
-
-        /* --- 4. 主布局 --- */
-        .layout-container { display: grid; grid-template-columns: 270px 1fr 310px; gap: 24px; max-width: 1600px; margin: 20px auto; padding: 0 24px; }
-        
-        .sidebar-left { 
-            display: flex; flex-direction: column; gap: 5px; font-size: 14px; 
-            position: sticky; top: 60px; height: fit-content; /* 侧边栏跟随 */
-        }
-        .nav-item { padding: 8px 12px; border-radius: 4px; cursor: pointer; color: var(--text-main); }
-        .nav-item:hover { background-color: var(--hover-bg); }
-        .nav-item.active { background-color: #e6e9ea; font-weight: bold; }
-        .section-header { font-size: 10px; text-transform: uppercase; color: var(--text-meta); margin: 15px 0 5px 12px; font-weight: bold; }
-
-        .main-feed { min-width: 0; }
-
-        .sidebar-right { 
-            display: flex; flex-direction: column; gap: 16px; 
-            position: sticky; top: 60px; height: fit-content; /* 侧边栏跟随 */
-        }
-        
-        /* 排序栏 */
-        .sort-bar { margin-bottom: 15px; display: flex; gap: 10px; }
-        .sort-btn { background: none; border: none; font-weight: bold; color: var(--text-meta); padding: 5px 10px; border-radius: 20px; cursor: pointer; }
-        .sort-btn:hover { background: #e6e9ea; }
-        .sort-btn.active { color: var(--color-blue); background: #f2f8fc; }
-
-        /* 帖子卡片 */
-        .post-card { background: var(--bg-card); border: 1px solid #ccc; border-radius: 4px; margin-bottom: 10px; display: flex; cursor: pointer; }
-        .post-card:hover { border-color: #898989; }
-        .vote-column { width: 40px; background: #F8F9FA; display: flex; flex-direction: column; align-items: center; padding-top: 8px; border-radius: 4px 0 0 4px; }
-        .vote-btn { font-size: 20px; color: #878A8C; cursor: pointer; font-weight: bold; padding: 2px 5px; }
-        .vote-btn:hover { background: #E8E8E8; }
-        .vote-count { font-size: 13px; font-weight: bold; margin: 5px 0; }
-        
-        .content-column { flex: 1; padding: 8px; }
-        .media-preview { background: black; display: flex; justify-content: center; margin-bottom: 10px; border-radius: 4px; overflow: hidden; }
-        .media-preview img, .media-preview video { max-width: 100%; max-height: 500px; object-fit: contain; }
-
-        /* Widget */
-        .widget-box { background: var(--bg-card); border: 1px solid #ccc; border-radius: 4px; overflow: hidden; }
-        .widget-header { background: var(--color-blue); color: white; padding: 10px; font-weight: bold; }
-        .widget-content { padding: 12px; }
-        .create-btn-full { width: 100%; background: var(--color-blue); color: white; font-weight: bold; height: 32px; border: none; border-radius: 99px; cursor: pointer; margin-top: 10px;}
-
-        /* 弹窗通用 */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; display: none; justify-content: center; align-items: center; }
-        .modal-overlay.active { display: flex; }
-        .modal-box { background: white; width: 500px; padding: 20px; border-radius: 8px; }
-        .modal-header { display: flex; justify-content: space-between; margin-bottom: 15px; font-weight: bold; font-size: 18px; }
-        .common-input { width: 100%; border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; border-radius: 4px; }
-        .primary-btn { width: 100%; background: var(--color-blue); color: white; padding: 10px; border: none; border-radius: 99px; cursor: pointer; }
-
-        @media (max-width: 1000px) { .sidebar-left { display: none; } .layout-container { grid-template-columns: 1fr 310px; } }
-        @media (max-width: 700px) { .sidebar-right { display: none; } .layout-container { grid-template-columns: 1fr; } }
+        /* 目前看来，首页的所有样式（卡片、侧边栏、排序条）都已经是通用的了。
+           所以这里可以是空的，甚至直接把 <style> 标签删掉！ */
     </style>
 </head>
 <body>
 
     <!-- 导航栏 -->
-    <nav class="navbar">
-        <a href="index.html" class="nav-logo">
-            <div class="nav-logo-icon">A</div>
-            <span>ACG Reddit</span>
-        </a>
-        <div class="nav-search">
-            <input type="text" class="search-input" placeholder="Search ACG Community" 
-                   onkeydown="if(event.key === 'Enter') loadFeed(undefined, undefined, this.value)">
-        </div>
-        
-        <div class="nav-right-area">
-            <!-- 1. 未登录区 -->
-            <div id="guest-nav" style="display: flex; gap:10px;">
-                <button class="btn-auth btn-outline" onclick="openModal('registerModal')">Sign Up</button>
-                <button class="btn-auth btn-login" onclick="openModal('loginModal')">Log In</button>
-            </div>
-
-            <!-- 2. 已登录区 (点击触发) -->
-            <div id="user-nav" class="user-dropdown-container" style="display: none;" onclick="toggleUserMenu(event)">
-                <div class="nav-avatar-box">
-                    <!-- 这里没有昵称了，只有头像和箭头 -->
-                    <img id="nav-avatar-img" class="nav-avatar" src="">
-                </div>
-            </div>
-            
-            <!-- 3. 下拉菜单 (完整内容) -->
-            <div id="user-menu" class="user-menu-dropdown">
-                <!-- 个人资料 -->
-                <div class="drawer-item profile-header" onclick="alert('功能待开发')">
-                    <div class="drawer-left">
-                        <div class="drawer-avatar-frame">
-                            <img id="drawer-avatar-img" class="drawer-avatar-img" src="https://example.com/default.png">
-                            <div class="status-dot"></div>
-                        </div>
-                        <div class="drawer-text-box">
-                            <span class="drawer-title">View Profile</span>
-                            <span class="drawer-subtitle" id="drawer-username">u/User</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="drawer-divider"></div>
-
-                <!-- 编辑头像 -->
-                <div class="drawer-item" onclick="triggerAvatarUpload()">
-                    <div class="drawer-left">
-                        <div class="drawer-icon">
-                            <svg fill="currentColor" height="20" viewBox="0 0 20 20" width="20"><path d="M14.362 2.916L18 6.602l-1.895 1.864-2.185-1.709-.01 8.357a1 1 0 01-1 .999H7.091a1 1 0 01-1-1l.002-8.308-2.204 1.652L2 6.602l3.639-3.686h1.264A3.173 3.173 0 0010 5.406a3.174 3.174 0 003.097-2.49h1.265zm0-1.8h-1.265a1.8 1.8 0 00-1.758 1.412A1.38 1.38 0 0110 3.606a1.382 1.382 0 01-1.34-1.078 1.8 1.8 0 00-1.758-1.412H5.638c-.481 0-.943.193-1.281.535L.719 5.337a1.798 1.798 0 00.02 2.549l1.889 1.855a1.8 1.8 0 001.665.47v4.9c-.002.748.29 1.451.818 1.98.529.529 1.232.82 1.98.82h5.819a2.804 2.804 0 002.8-2.796l.005-4.893a1.798 1.798 0 001.652-.475l1.895-1.864a1.8 1.8 0 00.019-2.548l-3.638-3.686a1.8 1.8 0 00-1.281-.536v.003z"></path></svg>
-                        </div>
-                        <span class="drawer-title">Edit Avatar</span>
-                    </div>
-                </div>
-
-                <!-- 占位功能 -->
-                <div class="drawer-item">
-                    <div class="drawer-left">
-                        <div class="drawer-icon">
-                            <svg fill="currentColor" height="20" viewBox="0 0 20 20" width="20"><path d="M16.7 4H15V2.9a.9.9 0 00-.9-.9H5.9a.9.9 0 00-.9.9V4H3.301A2.304 2.304 0 001 6.3v.8c0 2.529 1.933 4.592 4.396 4.849a5.01 5.01 0 003.704 2.96V17.2H6.501a.9.9 0 000 1.8h7a.9.9 0 000-1.8h-2.599v-2.291a5.01 5.01 0 003.703-2.96c2.463-.257 4.396-2.32 4.396-4.849v-.8c0-1.268-1.033-2.3-2.301-2.3zM2.801 7.1v-.8a.5.5 0 01.5-.5H5V10c0 .018.005.035.005.053A3.093 3.093 0 012.801 7.1zM10 13.2A3.204 3.204 0 016.8 10V3.8h6.399V10c0 1.765-1.434 3.2-3.199 3.2zm7.199-6.1a3.095 3.095 0 01-2.204 2.953c0-.018.005-.035.005-.053V5.8h1.7a.5.5 0 01.499.5v.8z"></path></svg>
-                        </div>
-                        <div class="drawer-text-box">
-                            <span class="drawer-title">Achievements</span>
-                            <span class="drawer-subtitle">6 unlocked</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 退出登录 -->
-                <div class="drawer-divider"></div>
-                <div class="drawer-item" onclick="logout()">
-                    <div class="drawer-left">
-                        <div class="drawer-icon">
-                            <svg fill="currentColor" height="20" viewBox="0 0 20 20" width="20"><path d="M13.701 1H6.298a3.299 3.299 0 00-3.299 3.299v8.402A3.299 3.299 0 006.298 16h.701v.858a2.26 2.26 0 002.255 2.259c.293 0 .594-.058.889-.184l5.487-2.347a2.257 2.257 0 001.369-2.075V4.299A3.298 3.298 0 0013.701 1zM7 6.767V14.2h-.701A1.5 1.5 0 014.8 12.701V4.299A1.5 1.5 0 016.299 2.8h6.494L8.37 4.692A2.257 2.257 0 007 6.767zm8.2 7.744a.457.457 0 01-.277.42l-5.487 2.347a.461.461 0 01-.181.039.46.46 0 01-.455-.459V6.767c0-.183.109-.348.277-.42L14.564 4a.461.461 0 01.181-.039.46.46 0 01.455.459v10.091zM10.3 9.7h1.8v2.585h-1.8V9.7z"></path></svg>
-                        </div>
-                        <span class="drawer-title">Log Out</span>
-                    </div>
-                </div>
-
-            </div>
-            
-            <input type="file" id="avatar-upload-input" style="display: none;" accept="image/*">
-        </div>
-    </nav>
-
+    <div id="header-placeholder"></div>
     <!-- 主布局 -->
     <div class="layout-container">
         <!-- 左侧 -->
@@ -309,11 +99,22 @@
         </div>
     </div>
 
+    <script src="js/common.js"></script>
     <script>
+        
         // --- 1. 全局状态 ---
         let currentCategory = 'All';
         let currentSort = 'New';
         let currentKeyword = '';
+
+        window.onload = async function() {
+                // 1. 先加载公共头和侧边栏
+            await loadComponents();
+            
+            // 2. 再加载帖子列表 (把之前的 loadFeed 调用放到这里)
+            checkLogin(); // 其实 common.js 里也会调，多调一次无妨，或者删掉这行
+            loadFeed();
+        };
 
         // --- 2. 基础交互 ---
         function openModal(id) { document.getElementById(id).classList.add('active'); }
@@ -337,66 +138,8 @@
             }
         });
 
-        // --- 3. 认证逻辑 ---
-        async function checkLogin() {
-            try {
-                const res = await fetch('/api/auth/check');
-                const d = await res.json();
-                if(d.isLogin) {
-                    document.getElementById('guest-nav').style.display = 'none';
-                    document.getElementById('user-nav').style.display = 'flex';
-                    
-                    const avatar = d.user.avatar || 'https://example.com/default.png';
-                    document.getElementById('nav-avatar-img').src = avatar;
 
-                    if(document.getElementById('drawer-avatar-img')) {
-                         document.getElementById('drawer-avatar-img').src = avatar;
-                         document.getElementById('drawer-username').innerText = 'u/' + d.user.nickname;
-                    }
-                }
-            } catch(e) {}
-        }
-        async function doLogin() {
-            const u = document.getElementById('l-user').value;
-            const p = document.getElementById('l-pass').value;
-            try {
-                const res = await fetch('/api/auth/login', {
-                    method:'POST', headers:{'Content-Type':'application/json'},
-                    body: JSON.stringify({username:u, password:p})
-                });
-                const d = await res.json();
-                if(d.success) location.reload(); else alert(d.msg);
-            } catch(e){}
-        }
-        async function doRegister() {
-            const u = document.getElementById('r-user').value;
-            const n = document.getElementById('r-nick').value;
-            const p = document.getElementById('r-pass').value;
-            if(!u || !p) { alert("必填"); return; }
-            try {
-                const res = await fetch('/api/auth/register', {
-                    method:'POST', headers:{'Content-Type':'application/json'},
-                    body: JSON.stringify({username:u, nickname:n, password:p})
-                });
-                const d = await res.json();
-                if(d.success) { alert("Success"); switchModal('registerModal','loginModal'); }
-                else alert(d.msg);
-            } catch(e){}
-        }
-        async function logout() { await fetch('/api/auth/logout'); location.reload(); }
 
-        // --- 4. 业务逻辑 ---
-        function triggerAvatarUpload() { document.getElementById('avatar-upload-input').click(); }
-        document.getElementById('avatar-upload-input').onchange = async function() {
-            const file = this.files[0];
-            if(!file) return;
-            const fd = new FormData(); fd.append('file', file);
-            try {
-                const res = await fetch('/api/user/update-avatar', { method:'POST', body:fd });
-                const d = await res.json();
-                if(d.success) location.reload(); else alert(d.msg);
-            } catch(e){}
-        };
 
         async function doPublish() {
             const t = document.getElementById('p-title').value;
@@ -493,7 +236,7 @@
                         <div class="content-column">
                             <div style="font-size:12px; color:#787c7e; margin-bottom:5px;">
                                 <span style="font-weight:bold; color:black;">r/${topic.category || 'General'}</span>
-                                • Posted by u/${nickname} • ${time}
+                                • Posted by <a href="profile.html?id=${topic.author ? topic.author.id : 0}" style="font-weight:bold; hover:underline;">u/${nickname}</a> • ${time}
                             </div>
                             <div style="font-weight:bold; font-size:18px; margin-bottom:10px;">${topic.title}</div>
                             ${mediaHtml}
