@@ -143,4 +143,11 @@ public class TopicController {
     public Topic getTopicDetail(@PathVariable Long id) {
         return topicRepository.findById(id).orElse(null);
     }
+
+    // 👇 必须要有这个接口，前端才能获取发帖记录 👇
+    @GetMapping("/user/{userId}")
+    public List<Topic> getUserTopics(@PathVariable Long userId) {
+        return topicRepository.findByAuthorIdOrderByCreatedAtDesc(userId);
+    }
+
 }

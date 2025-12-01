@@ -8,7 +8,57 @@
     --color-primary: #D93A00;
     --color-blue: #0079D3;
     --hover-bg: #f6f7f8;
+    --bg-input: #F6F7F8; /* 新增：输入框背景 */
+    --border-color: #edeff1; /* 新增：边框颜色 */
 }
+/* --- 暗黑模式配色 --- */
+[data-theme="dark"] {
+    --bg-body: #030303;        /* 纯黑背景 */
+    --bg-card: #1A1A1B;        /* 卡片深灰 */
+    --bg-input: #272729;       /* 输入框深色 */
+    --text-main: #D7DADC;      /* 文字灰白 */
+    --text-meta: #818384;      /* 次要文字深灰 */
+    --color-primary: #D93A00;  /* 橙色保持不变 */
+    --color-blue: #D7DADC;     /* 蓝色变成白色(在黑底上更清晰) */
+    --hover-bg: #2d2d2e;       /* 悬停深灰 */
+    --border-color: #343536;   /* 边框深灰 */
+}
+/* 修改边框颜色为变量 */
+.navbar, .user-menu-dropdown, .post-card, .widget-box, .profile-card, 
+.post-form-card, .user-dropdown-container:hover, .drawer-divider,
+.modal-box, .common-input, .post-detail-card, .comment-area, .c-textarea,
+.rules-card, .submit-header, .rules-header {
+    border-color: var(--border-color) !important;
+}
+/* 修改输入框背景 */
+.search-input, .common-input, .input-title, .input-body, .category-select, .c-textarea {
+    background-color: var(--bg-input) !important;
+    color: var(--text-main) !important;
+}
+
+/* 确保下拉菜单背景跟随主题 */
+.user-menu-dropdown {
+    background-color: var(--bg-card) !important;
+}
+
+/* 确保侧边栏按钮文字颜色 */
+.nav-item {
+    color: var(--text-main) !important;
+}
+.nav-item:hover {
+    background-color: var(--hover-bg) !important;
+}
+.nav-item.active {
+    background-color: var(--hover-bg) !important; /* 暗黑模式下高亮也用悬停色 */
+}
+
+
+
+
+
+
+
+
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; }
     body { background-color: var(--bg-body); color: var(--text-main); padding-top: 50px; }
 a { text-decoration: none; color: inherit; cursor: pointer; }

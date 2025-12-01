@@ -17,6 +17,12 @@
             <button class="btn-auth btn-login" onclick="openModal('loginModal')">Log In</button>
         </div>
 
+        <!-- 【新增】发帖按钮 (默认隐藏，登录后显示) -->
+        <a href="submit.html" id="nav-create-btn" style="display: none; align-items: center; gap: 5px; margin-right: 15px; text-decoration: none; color: #1c1c1c; font-weight: 500; padding: 6px 12px; border-radius: 99px; transition: 0.2s;">
+            <svg fill="currentColor" height="20" viewBox="0 0 20 20" width="20"><path d="M19 9.375h-8.375V1h-1.25v8.375H1v1.25h8.375V19h1.25v-8.375H19v-1.25z"></path></svg>
+            Create
+        </a>
+        <style> #nav-create-btn:hover { background-color: #f2f4f5; } </style>
         <!-- 已登录状态 (点击触发) -->
         <div id="user-nav" class="user-dropdown-container" style="display: none;">
             <div class="nav-avatar-box">
@@ -67,6 +73,19 @@
 
             <div class="drawer-divider"></div>
 
+
+            <!-- 给整个一行加点击事件 -->
+            <div class="drawer-item" onclick="toggleDarkMode()">
+                <div class="drawer-left">
+                    <div class="drawer-icon">
+                        <svg fill="currentColor" height="20" viewBox="0 0 20 20" width="20"><path d="M9.642 18.642..."></path></svg>
+                    </div>
+                    <span class="drawer-title">Dark Mode</span>
+                </div>
+                <!-- 开关 UI -->
+                <div class="toggle-switch"><div class="toggle-knob"></div></div>
+            </div>
+            
             <!-- 4. 退出登录 -->
             <div class="drawer-item" onclick="logout()">
                 <div class="drawer-left">

@@ -89,4 +89,63 @@ public class UserController {
         }
         return user;
     }
+
+    // 1. 修改基本资料 (昵称)
+    @PostMapping("/update-info")
+    public Map<String, Object> updateInfo(@RequestBody Map<String, String> data, HttpSession session) {
+        Map<String, Object> result = new HashMap<>();
+        User currentUser = (User) session.getAttribute("user");
+        
+        if (currentUser == null) {
+            result.put("success", false);
+            result.put("msg", "请先登录");
+            return result;
+        }
+
+        String newNickname = data.get("nickname");
+        if (newNickname != null && !newNickname.trim().isEmpty()) {
+            // 重新从数据库获取最新对象，防止 session 数据滞后
+            User userInDb = userRepository.findById(currentUser.getId()).orElse(null);
+            if (userInDb != null) {
+                userInDb.setNickname(newNickname);
+                userRepository.save(userInDb);
+                session.setAttribute("user", userInDb); // 更新 session
+                result.put("success", true);
+                result.put("msg", "昵称已更新");
+            }
+        } else {
+            result.put("success", false);
+            result.put("msg", "昵称不能为空");
+        }
+        return result;
+    }
+
+    // 2. 修改密码
+    @PostMapping("/update-password")
+    public Map<String, Object> updatePassword(@RequestBody Map<String, String> data, HttpSession session) {
+        Map<String, Object> result = new HashMap<>();
+        User currentUser = (User) session.getAttribute("user");
+
+        if (currentUser == null) {
+            result.put("success", false);
+            result.put("msg", "请先登录");
+            return result;
+        }
+
+        String oldPass = data.get("oldPassword");
+        String newPass = data.get("newPassword");
+
+        User userInDb = userRepository.findById(currentUser.getId()).orElse(null);
+        
+        if (userInDb != null && userInDb.getPassword().equals(oldPass)) {
+            userInDb.setPassword(newPass); // 实际项目中记得加密！
+            userRepository.save(userInDb);
+            result.put("success", true);
+            result.put("msg", "密码修改成功");
+        } else {
+            result.put("success", false);
+            result.put("msg", "旧密码错误");
+        }
+        return result;
+    }
 }

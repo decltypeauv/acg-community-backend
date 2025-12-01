@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>Create a Post - ACG Reddit</title>
+    <link rel="stylesheet" href="css/global.css">
+    <style>
+        /* 发帖页专用样式 */
+        .submit-container { max-width: 740px; margin: 20px auto; display: grid; grid-template-columns: 1fr 300px; gap: 24px; }
+        .submit-header { grid-column: span 2; font-size: 18px; font-weight: 500; border-bottom: 1px solid #edeff1; padding-bottom: 15px; margin-bottom: 15px; }
+        
+        /* 表单区域 */
+        .post-form-card { background: white; border-radius: 4px; padding: 16px; border: 1px solid #edeff1; }
+        
+        .form-group { margin-bottom: 15px; }
+        .category-select { width: 300px; height: 40px; padding: 0 10px; border-radius: 4px; border: 1px solid #edeff1; outline: none; background: white; font-weight: bold; }
+        
+        .input-title { width: 100%; padding: 10px; border: 1px solid #edeff1; border-radius: 4px; font-size: 16px; outline: none; margin-bottom: 10px; }
+        .input-title:focus { border-color: #0079D3; }
+        
+        .input-body { width: 100%; height: 200px; padding: 10px; border: 1px solid #edeff1; border-radius: 4px; resize: vertical; outline: none; font-family: inherit; }
+        .input-body:focus { border-color: #0079D3; }
+
+        /* 图片上传区 */
+        .media-upload-box { border: 1px dashed #ccc; border-radius: 4px; padding: 20px; text-align: center; margin-bottom: 15px; cursor: pointer; transition: 0.2s; }
+        .media-upload-box:hover { background: #f6f7f8; border-color: #0079D3; }
+        .upload-label { color: #0079D3; font-weight: bold; }
+        
+        /* 预览区 */
+        .preview-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; margin-top: 10px; }
+        .preview-item { width: 100%; aspect-ratio: 1; border-radius: 4px; overflow: hidden; position: relative; border: 1px solid #eee; }
+        .preview-item img { width: 100%; height: 100%; object-fit: cover; }
+        .preview-remove { position: absolute; top: 2px; right: 2px; background: rgba(0,0,0,0.5); color: white; width: 20px; height: 20px; border-radius: 50%; text-align: center; line-height: 18px; cursor: pointer; font-size: 12px; }
+
+        /* 底部按钮 */
+        .form-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 15px; border-top: 1px solid #edeff1; padding-top: 15px; }
+        .btn-cancel { padding: 8px 20px; border: 1px solid #0079D3; color: #0079D3; border-radius: 99px; font-weight: bold; cursor: pointer; background: transparent; }
+        .btn-submit { padding: 8px 20px; background: #0079D3; color: white; border: none; border-radius: 99px; font-weight: bold; cursor: pointer; }
+        .btn-submit:disabled { background: #ccc; cursor: not-allowed; }
+
+        /* 右侧规则 */
+        .rules-card { background: white; border-radius: 4px; border: 1px solid #edeff1; padding: 12px; height: fit-content; }
+        .rules-header { display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #edeff1; padding-bottom: 10px; margin-bottom: 10px; font-weight: bold; }
+        .rule-list { list-style: decimal; padding-left: 20px; font-size: 14px; color: #1c1c1c; line-height: 1.6; }
+        .rule-list li { margin-bottom: 8px; padding-left: 5px; }
+
+        @media (max-width: 900px) { .submit-container { grid-template-columns: 1fr; } .rules-card { display: none; } }
+    </style>
+</head>
+<body>
+
+    <div id="header-placeholder"></div>
+
+    <div class="submit-container">
+        <div class="submit-header">Create a post</div>
+
+        <!-- 左侧：表单 -->
+        <div class="post-form-card">
+            <div class="form-group">
+                <select id="p-category" class="category-select">
+                    <option value="" disabled selected>Choose a Community (Category)</option>
+                    <option value="General">r/General</option>
+                    <option value="Anime">r/Anime</option>
+                    <option value="Game">r/Game</option>
+                    <option value="Art">r/Art</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <input type="text" id="p-title" class="input-title" placeholder="Title">
+            </div>
+
+            <!-- 图片上传区 -->
+            <div class="media-upload-box" onclick="document.getElementById('p-files').click()">
+                <div class="upload-label">Upload Images / Video</div>
+                <div style="font-size:12px; color:#999; margin-top:5px;">Drag and drop or click to upload</div>
+                <input type="file" id="p-files" multiple style="display: none;" onchange="handleFileSelect(this)">
+            </div>
+            <!-- 预览容器 -->
+            <div id="preview-container" class="preview-grid"></div>
+
+            <div class="form-group">
+                <textarea id="p-content" class="input-body" placeholder="Text (optional)"></textarea>
+            </div>
+
+            <div class="form-footer">
+                <button class="btn-cancel" onclick="history.back()">Cancel</button>
+                <button class="btn-submit" onclick="doSubmit()">Post</button>
+            </div>
+        </div>
+
+        <!-- 右侧：规则 -->
+        <div class="rules-card">
+            <div class="rules-header">
+                <img src="https://www.redditstatic.com/desktop2x/img/id-cards/snoo-home@2x.png" width="40">
+                Posting to ACG Reddit
+            </div>
+            <ol class="rule-list">
+                <li>Remember the human</li>
+                <li>Behave like you would in real life</li>
+                <li>Look for the original source of content</li>
+                <li>Search for duplicates before posting</li>
+                <li>Read the community's rules</li>
+            </ol>
+        </div>
+    </div>
+
+    <script src="js/common.js"></script>
+    <script>
+        // 1. 初始化
+        window.onload = async function() {
+            await loadComponents();
+            
+            // 检查登录，没登录踢回首页
+            const res = await fetch('/api/auth/check');
+            const d = await res.json();
+            if(!d.isLogin) {
+                alert("Please log in to post.");
+                window.location.href = "index.html";
+            }
+        };
+
+        // 2. 图片预览逻辑
+        function handleFileSelect(input) {
+            const container = document.getElementById('preview-container');
+            container.innerHTML = ""; // 简单起见，每次重选清空旧的
+            
+            if(input.files && input.files.length > 0) {
+                Array.from(input.files).forEach(file => {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const div = document.createElement('div');
+                        div.className = 'preview-item';
+                        
+                        // 简单的图片/视频判断
+                        if(file.type.startsWith('video')) {
+                            div.innerHTML = `<video src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;"></video>`;
+                        } else {
+                            div.innerHTML = `<img src="${e.target.result}">`;
+                        }
+                        container.appendChild(div);
+                    }
+                    reader.readAsDataURL(file);
+                });
+            }
+        }
+
+        // 3. 提交逻辑 (复用之前的 API)
+        async function doSubmit() {
+            const cat = document.getElementById('p-category').value;
+            const title = document.getElementById('p-title').value;
+            const content = document.getElementById('p-content').value;
+            const files = document.getElementById('p-files').files;
+
+            if(!cat) { alert("Please choose a community"); return; }
+            if(!title) { alert("Title is required"); return; }
+
+            const btn = document.querySelector('.btn-submit');
+            btn.innerText = "Posting..."; btn.disabled = true;
+
+            const fd = new FormData();
+            fd.append('category', cat);
+            fd.append('title', title);
+            fd.append('content', content);
+            for(let f of files) fd.append('files', f);
+
+            try {
+                const res = await fetch('/api/topic/publish', { method:'POST', body:fd });
+                const d = await res.json();
+                if(d.success) {
+                    window.location.href = "index.html"; // 成功后跳回首页
+                } else {
+                    alert(d.msg);
+                    btn.innerText = "Post"; btn.disabled = false;
+                }
+            } catch(e) {
+                alert("Error");
+                btn.innerText = "Post"; btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

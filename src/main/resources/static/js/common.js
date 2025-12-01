@@ -21,11 +21,44 @@ async function loadComponents() {
         // 组件加载完后，初始化全局事件
         initGlobalEvents();
         checkLogin();
+        initTheme(); //加载完组件后，立刻应用主题状态
         
     } catch (e) {
         console.error("加载组件出错:", e);
     }
 }
+
+// --- 暗黑模式逻辑 ---
+
+// 初始化：页面一加载就检查本地存没存过
+function initTheme() {
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    updateToggleUI(savedTheme === 'dark');
+}
+
+// 切换：点击开关时触发
+function toggleDarkMode() {
+    const current = document.documentElement.getAttribute('data-theme');
+    const target = current === 'dark' ? 'light' : 'dark';
+    
+    // 1. 设置属性 (CSS 会自动变色)
+    document.documentElement.setAttribute('data-theme', target);
+    // 2. 保存到本地 (刷新后还在)
+    localStorage.setItem('theme', target);
+    // 3. 动一下开关 UI
+    updateToggleUI(target === 'dark');
+}
+
+// 更新开关的小圆点位置
+function updateToggleUI(isDark) {
+    const toggle = document.querySelector('.toggle-switch');
+    if(toggle) {
+        if(isDark) toggle.classList.add('active');
+        else toggle.classList.remove('active');
+    }
+}
+
 
 // 2. 初始化全局事件 (菜单切换等)
 function initGlobalEvents() {
@@ -73,6 +106,10 @@ async function checkLogin() {
         if(d.isLogin) {
             document.getElementById('guest-nav').style.display = 'none';
             document.getElementById('user-nav').style.display = 'flex';
+
+            // 【新增】显示顶部的 Create 按钮
+            const createBtn = document.getElementById('nav-create-btn');
+            if(createBtn) createBtn.style.display = 'flex';
             
             const avatar = d.user.avatar || 'https://example.com/default.png';
             document.getElementById('nav-avatar-img').src = avatar;
