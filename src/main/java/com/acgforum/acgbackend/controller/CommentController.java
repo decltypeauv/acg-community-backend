@@ -40,6 +40,12 @@ public class CommentController {
         String content = (String) payload.get("content");
         Long topicId = Long.valueOf(payload.get("topicId").toString());
 
+        // 【新增】获取 parentId (可能是 null，如果是直接评论帖子的话)
+        Long parentId = null;
+        if (payload.get("parentId") != null) {
+            parentId = Long.valueOf(payload.get("parentId").toString());
+        }
+
         if (content == null || content.trim().isEmpty()) {
             result.put("success", false);
             result.put("msg", "评论内容不能为空");
@@ -59,6 +65,12 @@ public class CommentController {
         comment.setContent(content);
         comment.setUser(user);
         comment.setTopic(topic);
+        
+        // 【新增】如果有 parentId，设置父评论
+        if (parentId != null) {
+            Comment parentComment = commentRepository.findById(parentId).orElse(null);
+            comment.setParent(parentComment);
+        }
         
         commentRepository.save(comment);
 

@@ -8,7 +8,10 @@ import com.acgforum.acgbackend.repository.VoteRepository;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
+import com.acgforum.acgbackend.entity.Comment;         // 新增
+import com.acgforum.acgbackend.entity.CommentVote;     // 新增
+import com.acgforum.acgbackend.repository.CommentRepository; // 新增
+import com.acgforum.acgbackend.repository.CommentVoteRepository; // 新增
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -22,6 +25,10 @@ public class VoteController {
 
     @Autowired
     private TopicRepository topicRepository;
+
+    // 【新增】注入这两个 Repo
+    @Autowired private CommentVoteRepository commentVoteRepository;
+    @Autowired private CommentRepository commentRepository;
 
     // 投票接口
     @PostMapping("/toggle")
@@ -83,6 +90,63 @@ public class VoteController {
 
         result.put("success", true);
         result.put("newScore", topic.getVoteCount());
+        return result;
+    }
+
+    // 【新增】给评论投票接口
+    @PostMapping("/comment")
+    public Map<String, Object> toggleCommentVote(@RequestBody Map<String, Object> payload, HttpSession session) {
+        Map<String, Object> result = new HashMap<>();
+
+        // 1. 检查登录
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            result.put("success", false);
+            result.put("msg", "请先登录");
+            return result;
+        }
+
+        Long commentId = Long.valueOf(payload.get("commentId").toString());
+        int type = Integer.parseInt(payload.get("type").toString());
+
+        Comment comment = commentRepository.findById(commentId).orElse(null);
+        if (comment == null) {
+            result.put("success", false);
+            result.put("msg", "评论不存在");
+            return result;
+        }
+
+        // 2. 检查是否投过
+        Optional<CommentVote> existingOpt = commentVoteRepository.findByUserIdAndCommentId(user.getId(), commentId);
+        
+        if (comment.getVoteCount() == null) comment.setVoteCount(0);
+
+        if (existingOpt.isPresent()) {
+            CommentVote existing = existingOpt.get();
+            if (existing.getType() == type) {
+                // 取消投票
+                commentVoteRepository.delete(existing);
+                comment.setVoteCount(comment.getVoteCount() - type);
+            } else {
+                // 改票
+                comment.setVoteCount(comment.getVoteCount() - existing.getType() + type);
+                existing.setType(type);
+                commentVoteRepository.save(existing);
+            }
+        } else {
+            // 新投票
+            CommentVote newVote = new CommentVote();
+            newVote.setUser(user);
+            newVote.setComment(comment);
+            newVote.setType(type);
+            commentVoteRepository.save(newVote);
+            comment.setVoteCount(comment.getVoteCount() + type);
+        }
+
+        commentRepository.save(comment);
+
+        result.put("success", true);
+        result.put("newScore", comment.getVoteCount());
         return result;
     }
 }

@@ -3,6 +3,8 @@ package com.acgforum.acgbackend.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDateTime;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties; 
+import java.util.List; 
 
 @Data
 @Entity
@@ -31,4 +33,18 @@ public class Comment {
     public void onCreate() {
         createdAt = LocalDateTime.now();
     }
+     // 【新增】我是回复哪条评论的？(父评论)
+    @ManyToOne
+    @JoinColumn(name = "parent_id")
+    @JsonIgnoreProperties({"replies", "topic", "user"}) // 防止 JSON 死循环
+    private Comment parent;
+
+    // 【新增】我有多少条子回复？
+    // mappedBy="parent" 表示由上面那个 parent 字段来维护关系
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
+    @JsonIgnoreProperties({"parent", "topic"}) // 同样防止死循环
+    private List<Comment> replies;
+
+    // 【新增】评论的点赞数
+    private Integer voteCount = 0;
 }

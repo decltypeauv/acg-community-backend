@@ -18,6 +18,15 @@ async function loadComponents() {
             if(sidebarRes.ok) sidebarPlaceholder.innerHTML = await sidebarRes.text();
         }
 
+         // 3. 【新增】加载右侧 Sidebar
+        // 逻辑：只有页面里写了 id="right-placeholder" 才会加载
+        // 这样 profile.html 可以不写这个ID，从而保留它自己的个人资料卡
+        const rightPlaceholder = document.getElementById('right-placeholder');
+        if (rightPlaceholder) {
+            const res = await fetch('/components/sidebar-right.html');
+            if(res.ok) rightPlaceholder.innerHTML = await res.text();
+        }
+
         // 组件加载完后，初始化全局事件
         initGlobalEvents();
         checkLogin();
