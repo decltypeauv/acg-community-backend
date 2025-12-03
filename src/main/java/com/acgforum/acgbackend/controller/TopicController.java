@@ -150,4 +150,39 @@ public class TopicController {
         return topicRepository.findByAuthorIdOrderByCreatedAtDesc(userId);
     }
 
+    // 【新增】删除话题
+    @DeleteMapping("/delete/{id}")
+    public Map<String, Object> deleteTopic(@PathVariable Long id, HttpSession session) {
+        Map<String, Object> result = new HashMap<>();
+        User user = (User) session.getAttribute("user");
+
+        if (user == null) {
+            result.put("success", false);
+            result.put("msg", "请先登录");
+            return result;
+        }
+
+        Topic topic = topicRepository.findById(id).orElse(null);
+        if (topic == null) {
+            result.put("success", false);
+            result.put("msg", "帖子不存在");
+            return result;
+        }
+
+        // 权限检查：
+        // 1. 帖子必须有作者 (老数据可能没有)
+        // 2. 作者 ID 必须和当前登录用户一致
+        if (topic.getAuthor() == null || !topic.getAuthor().getId().equals(user.getId())) {
+            result.put("success", false);
+            result.put("msg", "无权删除 (或该帖无归属)");
+            return result;
+        }
+
+        // 删除 (JPA 会自动级联删除关联的 Media 和 Comment)
+        topicRepository.delete(topic);
+
+        result.put("success", true);
+        result.put("msg", "删除成功");
+        return result;
+    }
 }

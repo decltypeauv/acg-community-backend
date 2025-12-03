@@ -4,6 +4,7 @@ import com.acgforum.acgbackend.entity.User;
 import com.acgforum.acgbackend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.mindrot.jbcrypt.BCrypt;
 
 @Service
 public class UserService {
@@ -32,15 +33,23 @@ public class UserService {
             user.setRole("USER");
         }
 
+        // 【新增】密码加密的核心代码
+        // BCrypt.gensalt() 会自动生成随机盐，混入密码中
+        String hashedPassword = BCrypt.hashpw(user.getPassword(), BCrypt.gensalt());
+        user.setPassword(hashedPassword); // 把加密后的乱码塞回去
         // 3. 保存 (实际项目中记得加密密码，这里演示存明文)
         userRepository.save(user);
         return "注册成功";
     }
 
     // 登录逻辑 (保持不变)
-    public User login(String username, String password) {
+    public User login(String username, String rawPassword) {
         User user = userRepository.findByUsername(username).orElse(null);
-        if (user != null && user.getPassword().equals(password)) {
+
+        // 【修改】使用 checkpw 验证密码
+        // 参数1：用户输入的明文 (123)
+        // 参数2：数据库里的密文 ($2a$10$...)
+        if (BCrypt.checkpw(rawPassword, user.getPassword())) {
             return user;
         }
         return null;

@@ -9,11 +9,18 @@
                 <div><b>1.2k</b> <span style="color:#787c7e">Members</span></div>
                 <div><b>15</b> <span style="color:#787c7e">Online</span></div>
             </div>
-            <!-- 注意：这里调用的函数必须在 common.js 或主页面里定义 -->
-            <button class="create-btn-full" onclick="checkLoginAndOpenPublish()">Create Post</button>
+            
         </div>
     </div>
 
+    <!-- 推荐卡片 (新增) -->
+    <div class="widget-box" id="rec-widget" style="display: none; margin-bottom: 16px;">
+        <div class="widget-header" id="rec-title">Recommended</div>
+        <div class="widget-content" style="padding: 0;">
+            <!-- 列表容器 -->
+            <div id="rec-list" style="display: flex; flex-direction: column;"></div>
+        </div>
+    </div>
     <!-- 社区规则 -->
     <div class="widget-box">
         <div class="widget-header" style="background: #1A1A1B;">r/Rules</div>

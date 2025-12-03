@@ -40,4 +40,15 @@ public class Topic {
     public void onCreate() {
         createdAt = LocalDateTime.now();
     }
+    // 【新增】级联删除：删帖子时，自动删掉下面的所有评论
+    @OneToMany(mappedBy = "topic", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnoreProperties({"topic", "parent", "replies"}) // 防止死循环
+    private List<Comment> comments;
+
+
+    
+    // 【新增】级联删除：删帖子时，自动删掉相关的点赞记录
+    @OneToMany(mappedBy = "topic", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnoreProperties("topic") // 防止死循环
+    private List<Vote> votes;
 }

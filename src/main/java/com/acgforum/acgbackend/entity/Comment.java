@@ -28,6 +28,8 @@ public class Comment {
     private Topic topic;
 
     private LocalDateTime createdAt;
+    // 【新增】评论附带的图片路径
+    private String imageUrl;
 
     @PrePersist
     public void onCreate() {
@@ -47,4 +49,9 @@ public class Comment {
 
     // 【新增】评论的点赞数
     private Integer voteCount = 0;
+
+    // 【新增】级联删除：删评论时，自动把这条评论收到的“赞/踩”记录全删掉
+    @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnoreProperties("comment") // 防止 JSON 死循环
+    private List<CommentVote> commentVotes;
 }

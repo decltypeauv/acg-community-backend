@@ -31,6 +31,8 @@ async function loadComponents() {
         initGlobalEvents();
         checkLogin();
         initTheme(); //加载完组件后，立刻应用主题状态
+
+        loadRecommendations(); // 加载推荐列表
         
     } catch (e) {
         console.error("加载组件出错:", e);
@@ -151,8 +153,88 @@ async function doLogin() {
 }
 
 async function doRegister() {
-    // ... 简单的注册逻辑，这里省略 ...
-    alert("请复用之前的注册逻辑");
+    const u = document.getElementById('r-user').value;
+    const n = document.getElementById('r-nick').value;
+    const p = document.getElementById('r-pass').value;
+
+    if(!u || !p) { alert("账号和密码必填"); return; }
+
+    const btn = document.querySelector('#registerModal .primary-btn');
+    // 防止重复点击
+    if(btn) { btn.innerText = "Signing up..."; btn.disabled = true; }
+
+    try {
+        const res = await fetch('/api/auth/register', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                username: u,
+                password: p,
+                nickname: n
+            })
+        });
+        const d = await res.json();
+
+        if(d.success) {
+            alert("注册成功！请登录");
+            switchModal('registerModal', 'loginModal'); // 注册完自动跳到登录框
+        } else {
+            alert("注册失败: " + d.msg);
+        }
+    } catch(e) {
+        alert("网络错误");
+    } finally {
+        if(btn) { btn.innerText = "Sign Up"; btn.disabled = false; }
+    }
 }
 
+
 async function logout() { await fetch('/api/auth/logout'); location.reload(); }
+
+// --- 推荐系统逻辑 ---
+async function loadRecommendations() {
+    const widget = document.getElementById('rec-widget');
+    const listContainer = document.getElementById('rec-list');
+    const titleEl = document.getElementById('rec-title');
+    
+    // 如果当前页面没有右边栏（比如 profile.html 自己写了右栏），可能找不到元素
+    if (!widget || !listContainer) return;
+
+    try {
+        const res = await fetch('/api/recommend/sidebar');
+        const data = await res.json();
+
+        if (data.list && data.list.length > 0) {
+            widget.style.display = 'block'; // 有数据才显示
+            titleEl.innerText = data.title; // 显示推荐理由 (e.g. "Because you like Anime")
+            
+            listContainer.innerHTML = ''; // 清空
+
+            data.list.forEach(topic => {
+                // 生成迷你卡片
+                const div = document.createElement('div');
+                div.style.cssText = 'padding: 10px; border-bottom: 1px solid #edeff1; cursor: pointer; display: flex; align-items: start; gap: 8px;';
+                div.onmouseover = () => div.style.backgroundColor = '#f6f7f8';
+                div.onmouseout = () => div.style.backgroundColor = 'transparent';
+                div.onclick = () => window.location.href = `topic_detail.html?id=${topic.id}`;
+
+                // 如果帖子有图，显示一个小缩略图
+                let imgHtml = '';
+                if(topic.mediaList && topic.mediaList.length > 0 && topic.mediaList[0].type === 'IMAGE') {
+                    imgHtml = `<img src="${topic.mediaList[0].url}" style="width:40px; height:40px; border-radius:4px; object-fit:cover; flex-shrink:0;">`;
+                }
+
+                div.innerHTML = `
+                    ${imgHtml}
+                    <div style="flex:1; min-width:0;">
+                        <div style="font-size:13px; font-weight:500; line-height:1.4; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;">${topic.title}</div>
+                        <div style="font-size:11px; color:#787c7e; margin-top:2px;">${topic.voteCount || 0} votes</div>
+                    </div>
+                `;
+                listContainer.appendChild(div);
+            });
+        }
+    } catch (e) {
+        console.error("推荐加载失败", e);
+    }
+}
