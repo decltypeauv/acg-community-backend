@@ -122,6 +122,13 @@ async function checkLogin() {
             const createBtn = document.getElementById('nav-create-btn');
             if(createBtn) createBtn.style.display = 'flex';
             
+            // 【新增】显示铃铛
+            const bell = document.getElementById('nav-bell');
+            if(bell) bell.style.display = 'flex';
+
+            // 【新增】查询未读数量
+            checkUnreadCount();
+
             const avatar = d.user.avatar || 'https://example.com/default.png';
             document.getElementById('nav-avatar-img').src = avatar;
 
@@ -237,4 +244,21 @@ async function loadRecommendations() {
     } catch (e) {
         console.error("推荐加载失败", e);
     }
+}
+
+ // 【新增】查询未读数函数
+async function checkUnreadCount() {
+    try {
+        const res = await fetch('/api/notification/unread-count');
+        const d = await res.json();
+        const badge = document.getElementById('nav-bell-badge');
+        if (badge) {
+            if (d.count > 0) {
+                badge.style.display = 'block';
+                badge.innerText = d.count > 99 ? '99+' : d.count;
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+    } catch(e) {}
 }

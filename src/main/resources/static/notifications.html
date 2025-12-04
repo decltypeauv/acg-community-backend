@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>Notifications</title>
+    <link rel="stylesheet" href="css/global.css">
+    <style>
+        .notify-container { max-width: 800px; margin: 20px auto; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 4px; overflow: hidden; }
+        .notify-header { padding: 15px 20px; border-bottom: 1px solid var(--border-color); font-weight: bold; font-size: 18px; }
+        
+        .notify-item { padding: 15px 20px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; gap: 15px; cursor: pointer; transition: 0.2s; }
+        .notify-item:hover { background-color: var(--hover-bg); }
+        .notify-item.unread { background-color: rgba(0, 121, 211, 0.05); } /* 未读高亮 */
+        
+        .n-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+        .n-content { flex: 1; font-size: 14px; }
+        .n-time { font-size: 12px; color: var(--text-meta); margin-top: 4px; }
+        .n-dot { width: 8px; height: 8px; background: #0079D3; border-radius: 50%; display: none; }
+        .unread .n-dot { display: block; }
+    </style>
+</head>
+<body>
+
+    <div id="header-placeholder"></div>
+
+    <div class="layout-container">
+        <div id="sidebar-placeholder"></div>
+
+        <main class="main-feed">
+            <div class="notify-container">
+                <div class="notify-header">Notifications</div>
+                <div id="notify-list">Loading...</div>
+            </div>
+        </main>
+        
+        <div id="right-placeholder"></div>
+    </div>
+
+    <script src="js/common.js"></script>
+    <script>
+        window.onload = async function() {
+            await loadComponents();
+            loadNotifications();
+        };
+
+        async function loadNotifications() {
+            const container = document.getElementById('notify-list');
+            try {
+                const res = await fetch('/api/notification/list');
+                const list = await res.json();
+                
+                container.innerHTML = "";
+                if(list.length === 0) {
+                    container.innerHTML = '<div style="padding:20px; text-align:center; color:#777">No notifications yet.</div>';
+                    return;
+                }
+
+                list.forEach(n => {
+                    const avatar = n.actor && n.actor.avatar ? n.actor.avatar : 'https://example.com/default.png';
+                    const actorName = n.actor ? n.actor.nickname : 'Unknown';
+                    const time = new Date(n.createdAt).toLocaleString();
+                    const unreadClass = n.read ? '' : 'unread';
+
+                    const div = document.createElement('div');
+                    div.className = `notify-item ${unreadClass}`;
+                    
+                    // 点击通知：标记为已读 -> 跳转
+                    div.onclick = async () => {
+                        await fetch(`/api/notification/read/${n.id}`, { method: 'POST' });
+                        // 跳转到帖子详情
+                        window.location.href = `topic_detail.html?id=${n.topic.id}`;
+                    };
+
+                    div.innerHTML = `
+                        <img src="${avatar}" class="n-avatar">
+                        <div class="n-content">
+                            <div><span style="font-weight:bold">${actorName}</span> ${n.message}</div>
+                            <div class="n-time">${time}</div>
+                        </div>
+                        <div class="n-dot"></div>
+                    `;
+                    container.appendChild(div);
+                });
+
+            } catch(e) { console.error(e); }
+        }
+    </script>
+</body>
+</html>

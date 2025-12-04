@@ -1,9 +1,11 @@
 package com.acgforum.acgbackend.controller;
 
 import com.acgforum.acgbackend.entity.Comment;
+import com.acgforum.acgbackend.entity.Notification;
 import com.acgforum.acgbackend.entity.Topic;
 import com.acgforum.acgbackend.entity.User;
 import com.acgforum.acgbackend.repository.CommentRepository;
+import com.acgforum.acgbackend.repository.NotificationRepository;
 import com.acgforum.acgbackend.repository.TopicRepository;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +27,7 @@ public class CommentController {
     @Autowired
     private TopicRepository topicRepository;
 
+    @Autowired private NotificationRepository notificationRepository; // 【新增】
     // 注入配置里的上传路径 (如果之前没写，记得加上)
     @Value("${file.upload-dir}")
     private String uploadDir;
@@ -99,6 +102,37 @@ public class CommentController {
         }
         
         commentRepository.save(comment);
+
+
+
+        // =========== 👇【新增】通知逻辑开始 👇 ===========
+        
+        // 目标用户 (我们要通知谁？)
+        User targetUser = null;
+        String msgContent = "";
+
+        if (parentId != null) {
+            // 情况 A：这是楼中楼 -> 通知父评论的作者
+            Comment parent = comment.getParent();
+            targetUser = parent.getUser();
+            msgContent = "replied to your comment";
+        } else {
+            // 情况 B：这是直接评论帖子 -> 通知帖主
+            targetUser = topic.getAuthor();
+            msgContent = "replied to your post: " + topic.getTitle();
+        }
+
+        // 关键判断：自己回复自己不用通知
+        if (targetUser != null && !targetUser.getId().equals(user.getId())) {
+            Notification notify = new Notification();
+            notify.setReceiver(targetUser);
+            notify.setActor(user); // 触发者是当前登录用户
+            notify.setTopic(topic);
+            notify.setMessage(msgContent);
+            notify.setRead(false);
+            notificationRepository.save(notify);
+        }
+        // =========== 👆【新增】通知逻辑结束 👆 ===========
 
         result.put("success", true);
         result.put("msg", "评论成功");

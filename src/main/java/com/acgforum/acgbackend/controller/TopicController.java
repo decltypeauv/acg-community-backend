@@ -4,6 +4,7 @@ import com.acgforum.acgbackend.entity.Media;
 import com.acgforum.acgbackend.entity.Topic;
 import com.acgforum.acgbackend.entity.User;
 import com.acgforum.acgbackend.repository.MediaRepository;
+import com.acgforum.acgbackend.repository.NotificationRepository;
 import com.acgforum.acgbackend.repository.TopicRepository;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,10 +25,13 @@ public class TopicController {
 
     @Autowired
     private MediaRepository mediaRepository;
+    @Autowired
+    private NotificationRepository notificationRepository; // 【1. 注入通知仓库】
 
     // 读取配置文件里的上传路径
     @Value("${file.upload-dir}")
     private String uploadDir;
+
 
     // 【核心升级】发布话题（支持带附件）
     // 注意：这里不用 @RequestBody，因为要接收文件流，直接用参数接收
@@ -177,6 +181,11 @@ public class TopicController {
             result.put("msg", "无权删除 (或该帖无归属)");
             return result;
         }
+
+        //删除相关的通知
+        notificationRepository.deleteByTopicId(id);
+
+
 
         // 删除 (JPA 会自动级联删除关联的 Media 和 Comment)
         topicRepository.delete(topic);
