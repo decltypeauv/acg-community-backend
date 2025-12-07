@@ -1,28 +1,48 @@
 /* static/css/global.css */
-/* --- 1. 核心变量 --- */
+/* --- 夏美子主题 (Shamiko Theme) --- */
 :root {
-    --bg-body: #DAE0E6;
-    --bg-card: #FFFFFF;
-    --text-main: #1c1c1c;
-    --text-meta: #787c7e;
-    --color-primary: #D93A00;
-    --color-blue: #0079D3;
-    --hover-bg: #f6f7f8;
-    --bg-input: #F6F7F8; /* 新增：输入框背景 */
-    --border-color: #edeff1; /* 新增：边框颜色 */
+     /* --- 亮色模式：常服/校服配色 (柔和的粉紫、米色) --- */
+    /* 背景趋向于浅紫/薰衣草色，模拟图中的背景 */
+    --bg-body: #DCD6F7; 
+    /* 卡片背景：稍微带点粉白的暖色 */
+    --bg-card: #FFFDFE;
+    /* 输入框背景 */
+    --bg-input: #F4EEFF;
+    /* 主要文字：深紫色，比纯黑更柔和 */
+    --text-main: #4A4063;
+    /* 次要文字 */
+    --text-meta: #7C7392;
+    /* 核心主色：夏美子发色的粉色 */
+    --color-primary: #E985A1; 
+    /* 辅助色/链接色：稍微深一点的洋红 */
+    --color-blue: #C65D7B; 
+    /* 悬停背景：浅粉色 */
+    --hover-bg: #FDE8F0;
+    /* 边框颜色 */
+    --border-color: #E0D6EB;
+    /* 顶部导航栏背景：深紫色 (对应图中的深色顶栏) */
+    --nav-bg: #5B4B78;
+    --nav-text: #FFFFFF;
 }
 /* --- 暗黑模式配色 --- */
 [data-theme="dark"] {
-    --bg-body: #030303;        /* 纯黑背景 */
-    --bg-card: #1A1A1B;        /* 卡片深灰 */
-    --bg-input: #272729;       /* 输入框深色 */
-    --text-main: #D7DADC;      /* 文字灰白 */
-    --text-meta: #818384;      /* 次要文字深灰 */
-    --color-primary: #D93A00;  /* 橙色保持不变 */
-    --color-blue: #D7DADC;     /* 蓝色变成白色(在黑底上更清晰) */
-    --hover-bg: #2d2d2e;       /* 悬停深灰 */
-    --border-color: #343536;   /* 边框深灰 */
+    --bg-body: #120B14;        /* 深邃的黑紫 */
+    --bg-card: #1E1523;        /* 卡片深紫灰 */
+    --bg-input: #2D2235;       
+    --text-main: #EADCF5;      /* 灰白带紫 */
+    --text-meta: #9A8C9E;      
+    /* 核心主色：危机管理形态的高亮玫红 */
+    --color-primary: #FF2E63;  
+    /* 辅助色：荧光紫 */
+    --color-blue: #B528EB;     
+    --hover-bg: #36203D;
+    --border-color: #443152;
+    --nav-bg: #251B2E;
+    --nav-text: #FF2E63; /* 顶栏文字变红 */
 }
+
+
+
 /* 修改边框颜色为变量 */
 .navbar, .user-menu-dropdown, .post-card, .widget-box, .profile-card, 
 .post-form-card, .user-dropdown-container:hover, .drawer-divider,
@@ -51,14 +71,29 @@
 .nav-item.active {
     background-color: var(--hover-bg) !important; /* 暗黑模式下高亮也用悬停色 */
 }
+/* --- 发帖按钮样式 (适配主题色) --- */
+.nav-create-btn {
+    align-items: center; 
+    gap: 5px; 
+    margin-right: 15px; 
+    text-decoration: none; 
+    font-weight: 500; 
+    padding: 6px 16px; 
+    border-radius: 99px; 
+    transition: 0.2s;
+    
+    /* ✨ 关键点：使用变量 ✨ */
+    /* 跟随导航栏的文字颜色 (夏美子主题下通常是白色或粉色) */
+    color: var(--nav-text) !important; 
+    
+    /* 加一个细边框，让它像个按钮 */
+    border: 1px solid var(--nav-text);
+}
 
-
-
-
-
-
-
-
+.nav-create-btn:hover {
+    /* 悬停时变成半透明背景 */
+    background-color: rgba(255, 255, 255, 0.15); 
+}
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; }
     body { background-color: var(--bg-body); color: var(--text-main); padding-top: 50px; }
 a { text-decoration: none; color: inherit; cursor: pointer; }
@@ -68,16 +103,36 @@ a { text-decoration: none; color: inherit; cursor: pointer; }
     position: fixed; top: 0; left: 0; width: 100%; height: 48px;
     background: var(--bg-card); border-bottom: 1px solid #edeff1;
     display: flex; align-items: center; justify-content: space-between; padding: 0 20px; z-index: 1000;
+    background: var(--nav-bg) !important; 
+    border-bottom: none; /* 去掉边框，更扁平 */
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    color: var(--nav-text);
 }
 .nav-logo { display: flex; align-items: center; gap: 8px; font-weight: bold; font-size: 18px; }
 .nav-logo-icon { width: 32px; height: 32px; background: var(--color-primary); border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; }
-
+/* 导航栏里的链接文字颜色 */
+.nav-logo, .btn-auth, .nav-icon {
+    color: var(--nav-text) !important;
+}
 .nav-search { flex: 1; max-width: 600px; margin: 0 20px; }
 .search-input { 
     width: 100%; height: 32px; background: #F6F7F8; border: 1px solid #EDEFF1; 
     border-radius: 16px; padding: 0 16px; outline: none; transition: 0.2s;
 }
 .search-input:focus { background: white; border-color: var(--color-blue); }
+/* 搜索框微调 */
+.search-input {
+    background: rgba(255, 255, 255, 0.2) !important; /* 半透明白 */
+    border: none;
+    color: white !important; /* 输入文字白色 */
+}
+.search-input::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+}
+.search-input:focus {
+    background: white !important;
+    color: #333 !important;
+}
 
 /* 右上角区域 */
 .nav-right-area { display: flex; align-items: center; height: 100%; }
@@ -185,3 +240,31 @@ a { text-decoration: none; color: inherit; cursor: pointer; }
 
 @media (max-width: 1000px) { .sidebar-left { display: none; } .layout-container { grid-template-columns: 1fr 310px; } }
 @media (max-width: 700px) { .sidebar-right { display: none; } .layout-container { grid-template-columns: 1fr; } }
+
+/* --- 强制修正顶部栏样式 --- */
+.navbar {
+    background-color: var(--nav-bg) !important; /* 强制使用深紫色 */
+    border-bottom: none !important;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    color: var(--nav-text) !important;
+}
+
+/* logo 和文字变白 */
+.nav-logo, .nav-logo span, .btn-auth {
+    color: var(--nav-text) !important;
+}
+
+/* 搜索框美化 (半透明白) */
+.search-input {
+    background-color: rgba(255, 255, 255, 0.2) !important; 
+    border: 1px solid rgba(255,255,255,0.1) !important;
+    color: white !important; 
+}
+.search-input::placeholder {
+    color: rgba(255, 255, 255, 0.7) !important;
+}
+/* 鼠标点进去时变白底黑字 */
+.search-input:focus {
+    background-color: #FFFFFF !important;
+    color: #333 !important;
+}

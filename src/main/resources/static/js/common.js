@@ -33,6 +33,9 @@ async function loadComponents() {
         initTheme(); //加载完组件后，立刻应用主题状态
 
         loadRecommendations(); // 加载推荐列表
+
+        // 【新增】加载夏美子装饰 (所有页面生效)
+        addShamikoDecor();
         
     } catch (e) {
         console.error("加载组件出错:", e);
@@ -261,4 +264,63 @@ async function checkUnreadCount() {
             }
         }
     } catch(e) {}
+}
+
+// --- 新增函数：添加看板娘 ---
+function addShamikoDecor() {
+    // 1. 创建左边的夏美子 (Shamiko)
+    const leftImg = document.createElement('img');
+    leftImg.id = 'decor-shamiko';
+    // 初始默认为常服，之后由 toggleDarkMode 控制切换
+    leftImg.src = '/images/shamiko_casual.png'; 
+    leftImg.style.cssText = "position: fixed; bottom: 0; left: 0; width: 250px; z-index: 9999; pointer-events: none; transition: 0.5s;";
+    document.body.appendChild(leftImg);
+
+    // 2. 创建右边的桃 (Momo) - 可选
+    const rightImg = document.createElement('img');
+    rightImg.src = '/images/momo_casual.png'; // 如果你有桃的图
+    rightImg.style.cssText = "position: fixed; bottom: 0; right: 0; width: 200px; z-index: 9999; pointer-events: none; transition: 0.5s;";
+    document.body.appendChild(rightImg);
+
+    // 立即根据当前模式刷新一下图片
+    updateDecorImage();
+}
+
+// --- 修改 toggleDarkMode 函数 (完整版) ---
+function toggleDarkMode() {
+    // 1. 获取当前是什么模式
+    const current = document.documentElement.getAttribute('data-theme');
+    
+    // 2. 定义目标模式 (如果是 dark 就变 light，反之亦然)
+    const target = current === 'dark' ? 'light' : 'dark';
+    
+    // 3. 设置属性 (CSS 会自动变色)
+    document.documentElement.setAttribute('data-theme', target);
+    
+    // 4. 保存到本地
+    localStorage.setItem('theme', target);
+    
+    // 5. 更新开关 UI
+    updateToggleUI(target === 'dark');
+
+    // 6. 更新夏美子立绘 (切换变身形态)
+    updateDecorImage(); 
+}
+
+// --- 新增：根据暗黑模式切换立绘 ---
+function updateDecorImage() {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const shamiko = document.getElementById('decor-shamiko');
+
+    if (shamiko) {
+        if (isDark) {
+            // 暗黑模式：危机管理形态
+            shamiko.src = '/images/shamiko_crisis.png';
+            shamiko.style.filter = "drop-shadow(0 0 10px rgba(255, 46, 99, 0.5))"; // 加点发光特效
+        } else {
+            // 亮色模式：常服
+            shamiko.src = '/images/shamiko_casual.png';
+            shamiko.style.filter = "none";
+        }
+    }
 }
